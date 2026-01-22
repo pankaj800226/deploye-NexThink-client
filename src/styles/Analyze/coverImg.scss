@@ -1,0 +1,71 @@
+.cover-wrapper {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #f3f4f6;
+  
+    &:hover .cover-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  
+    @media (max-width: 768px) {
+      height: 180px;
+      border-radius: 8px;
+    }
+  }
+  
+  .cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  /* Action buttons */
+  .cover-actions {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 10px;
+  
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  
+    @media (max-width: 768px) {
+      bottom: 10px;
+      right: 10px;
+      gap: 8px;
+    }
+  }
+  
+  .cover-btn {
+    text-transform: none !important;
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #111827 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  
+    &:hover {
+      background: #ffffff !important;
+    }
+  }
+  
+  .cover-btn.edit {
+    color: #2563eb !important;
+  }
+  
+  .cover-btn.delete {
+    color: #dc2626 !important;
+  }
+  

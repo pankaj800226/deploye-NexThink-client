@@ -1,0 +1,60 @@
+.loading_wrapper {
+  height: 100vh;
+  width: 100%;
+  background-color: #0F1214; /* dark background */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 15px #6a5af9);
+    animation: logoPulse 1.5s ease-in-out infinite;
+  }
+
+  .loader_bar {
+    width: 250px; /* bar width */
+    height: 6px;
+    background-color: #1f242b; /* track */
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+
+    .loader_fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #6a5af9, #8f73f7);
+      animation: loadAnim 2s infinite;
+      border-radius: 3px;
+    }
+  }
+}
+
+/* Logo subtle pulse */
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.85;
+  }
+}
+
+/* Linear bar animation */
+@keyframes loadAnim {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

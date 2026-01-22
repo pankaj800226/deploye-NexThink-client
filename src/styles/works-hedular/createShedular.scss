@@ -1,0 +1,274 @@
+/* ===== Root Theme ===== */
+$bg: #222;
+$card: #2a2a2a;
+$border: rgba(255, 255, 255, 0.08);
+$text: #eaeaea;
+$muted: #a1a1a1;
+$accent: #4f9cff;
+$success: #4ade80;
+
+/* ===== Layout ===== */
+.habit-wrapper {
+  min-height: 100vh;
+  padding: 20px;
+  color: $text;
+}
+
+/* ===== Input Box ===== */
+.habit-input {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
+
+  input {
+    flex: 1;
+    padding: 14px 16px;
+    background-color: transparent;
+    border: 1px solid $border;
+    border-radius: 10px;
+    color: $text;
+    font-size: 15px;
+    outline: none;
+
+    &::placeholder {
+      color: $muted;
+    }
+
+    &:focus {
+      border-color: $accent;
+    }
+  }
+
+  button {
+    padding: 14px 20px;
+    background: linear-gradient(135deg, $accent, #7ab6ff);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(79, 156, 255, 0.35);
+    }
+  }
+}
+
+/* ===== Task Card ===== */
+.task-box {
+  // background: rgba(42, 42, 42, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+  h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+}
+
+/* ===== Table ===== */
+.habit-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+
+  thead {
+    th {
+      font-size: 13px;
+      font-weight: 500;
+      color: $muted;
+      padding: 12px 6px;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+    }
+
+    td {
+      padding: 12px 6px;
+      border-top: 1px solid $border;
+      position: relative;
+    }
+  }
+}
+
+/* ===== Week Column ===== */
+td:first-child {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+
+  span {
+    font-size: 12px;
+    color: $muted;
+  }
+}
+
+/* ===== Checkbox (Notion Style) ===== */
+.check-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  input {
+    display: none;
+  }
+
+  span {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid $border;
+    background: transparent;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  &.checked span {
+    background: $success;
+    border-color: $success;
+
+    &::after {
+      content: "✓";
+      position: absolute;
+      color: #000;
+      font-size: 13px;
+      font-weight: 700;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+}
+
+/* ===== Date Label ===== */
+.date-label {
+  font-size: 11px;
+  color: $muted;
+  margin-top: 6px;
+}
+
+/* ===== Responsive Media Queries Only ===== */
+@media (max-width: 1024px) {
+  .habit-wrapper {
+    padding: 30px 20px;
+  }
+
+  .habit-input {
+    gap: 10px;
+
+    input {
+      font-size: 14px;
+      padding: 12px 14px;
+    }
+
+    button {
+      font-size: 14px;
+      padding: 12px 16px;
+    }
+  }
+
+  .task-box {
+    padding: 18px;
+
+    h2 {
+      font-size: 16px;
+    }
+
+    .habit-table {
+      thead th {
+        font-size: 12px;
+        padding: 10px 4px;
+      }
+
+      tbody td {
+        font-size: 12px;
+        padding: 10px 4px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .habit-wrapper {
+    padding: 20px 12px;
+  }
+
+  .habit-input {
+    flex-direction: column;
+
+    input,
+    button {
+      width: 100%;
+    }
+  }
+
+  .task-box {
+    padding: 16px;
+
+    h2 {
+      font-size: 15px;
+    }
+
+    .habit-table {
+      display: block;
+      overflow-x: auto;
+      width: 100%;
+
+      thead,
+      tbody,
+      tr,
+      th,
+      td {
+        display: block;
+      }
+
+      tr {
+        display: flex;
+        justify-content: flex-start;
+        gap: 10px;
+        padding-bottom: 8px;
+      }
+
+      th {
+        text-align: left;
+      }
+
+      td {
+        text-align: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .habit-wrapper {
+    padding: 15px 10px;
+  }
+
+  .habit-input {
+    gap: 8px;
+  }
+
+  .task-box {
+    padding: 14px;
+
+    h2 {
+      font-size: 14px;
+    }
+  }
+}

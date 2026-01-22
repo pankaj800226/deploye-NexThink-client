@@ -1,0 +1,144 @@
+/* =========================================================
+   Feature Section Wrapper with tRPC-Style Background
+   ========================================================= */
+
+.feature_wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 90vh;
+  padding: 6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  background: radial-gradient(
+      circle at top,
+      rgba(99, 102, 241, 0.12),
+      rgba(0, 0, 0, 0.95)
+    ),
+    linear-gradient(135deg, #020617, #020617);
+}
+
+/* ---------------- Floating Background Blobs ---------------- */
+
+.feature_blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.6;
+  animation: float 22s infinite ease-in-out;
+  z-index: 1;
+}
+
+.blob_a {
+  width: 400px;
+  height: 400px;
+  background: #6a5af9;
+  top: -100px;
+  left: -80px;
+  animation-delay: 0s;
+}
+
+.blob_b {
+  width: 350px;
+  height: 350px;
+  background: #00e5ff;
+  bottom: -120px;
+  right: -60px;
+  animation-delay: 10s;
+}
+
+@keyframes float {
+  0% { transform: translateY(0) translateX(0) scale(1); }
+  50% { transform: translateY(-30px) translateX(25px) scale(1.05); }
+  100% { transform: translateY(0) translateX(0) scale(1); }
+}
+
+/* ---------------- Section Header ---------------- */
+
+.banner_header {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #f8fafc;
+  text-align: center;
+  margin-bottom: 3rem;
+  z-index: 3;
+
+  background: linear-gradient(90deg, #ffffff, #c7d2fe, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------------- Feature Container ---------------- */
+
+.feature_container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1200px;
+  z-index: 3;
+}
+
+/* ---------------- Feature Card ---------------- */
+
+.feature_card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.3s ease;
+
+  p {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #f8fafc;
+    margin: 1.2rem 0 0.5rem;
+    text-align: center;
+  }
+
+  span {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-align: center;
+  }
+}
+
+/* ---------------- Icon Circle ---------------- */
+
+.icon_circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* ---------------- Hover Effects ---------------- */
+
+.feature_card:hover .icon_circle {
+  transform: scale(1.15);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+
+/* ---------------- Responsive ---------------- */
+
+@media (max-width: 900px) {
+  .feature_container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
