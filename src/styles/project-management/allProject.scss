@@ -1,0 +1,21 @@
+.project_header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    input{
+        width: 90%;
+        padding: 15px;
+        outline: 0;
+        border: 0;
+        border-radius: 5px;
+        background-color: transparent;
+        border: 1.2px solid white;
+        color: white;
+
+        button{
+            background-color: palevioletred;
+            width: 20px;
+        }
+    }
+}

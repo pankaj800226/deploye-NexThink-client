@@ -6,6 +6,9 @@ import Sidebar from "../../components/SideBar"
 import toast from "react-hot-toast"
 import ApiError from "../../components/ApiError"
 import Loading from "../../components/Loading"
+import CoverImg from "../Analyze/CoverImg"
+import { motion } from "framer-motion";
+
 
 interface Todo {
     _id: string
@@ -41,12 +44,22 @@ const TodoDetails = () => {
         fetchTodo()
     }, [id])
 
-  
+
 
     const priorityColor = (p: string) => {
         if (p === "High") return "#ff4d4d";
         if (p === "Medium") return "#ffb703";
         return "#4ade80";
+    };
+
+
+     const containerVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { staggerChildren: 0.2, duration: 0.6 }
+        }
     };
 
     if (error) return <ApiError error={error} />
@@ -57,8 +70,13 @@ const TodoDetails = () => {
             <Sidebar />
 
             <main>
+                <CoverImg />
                 {todoDetails && (
-                    <div className="todo-card">
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={containerVariants}
+                        className="todo-card">
 
                         <div className="todo-header">
                             <h1>{todoDetails.title}</h1>
@@ -99,7 +117,7 @@ const TodoDetails = () => {
                                     className={`status ${todoDetails.status}`}>
                                     {todoDetails.status}
                                 </span>
-                           
+
                             </div>
                         </div>
 
@@ -110,7 +128,7 @@ const TodoDetails = () => {
                             </pre>
                         </div>
 
-                    </div>
+                    </motion.div>
                 )}
                 {/* <Think_Drow /> */}
 

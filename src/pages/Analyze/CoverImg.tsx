@@ -1,4 +1,4 @@
-import {Edit, Upload } from "@mui/icons-material";
+import {Upload } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import coverImg from "../../assets/cover.jpg";
 import { useEffect, useState } from "react";
@@ -42,7 +42,7 @@ const CoverImg = () => {
 
         if (!selectedFile) return;
 
-        const maxSize = 800 * 1024;
+        const maxSize = 1000 * 1024;
 
         if (selectedFile.size > maxSize) {
             toast("File size must be less than 800 KB");
@@ -84,37 +84,31 @@ const CoverImg = () => {
         handleUpload()
     }, [file])
 
-  
+
 
 
     return (
         <div className="cover-wrapper">
-            {/* <img src={file ? URL.createObjectURL(file) : coverImg} alt="cover" className="cover-img" /> */}
-
-            <img src={covers?.coverPhoto || coverImg} alt="" className="cover-img" />
+            <img
+                src={covers?.coverPhoto || coverImg}
+                alt="cover"
+                className="cover-img"
+            />
 
             <div className="cover-actions">
                 <Button
-                    sx={{ color: "black" }}
-                    className="cover-btn edit" component="label">
+                    className={`cover-btn edit ${uploading ? "uploading" : ""}`}
+                    component="label"
+                >
                     <Upload fontSize="small" />
                     {uploading ? "Uploading..." : "Change cover"}
                     <input
                         onChange={handleFile}
-                        hidden type="file" accept="image/*" />
+                        hidden
+                        type="file"
+                        accept="image/*"
+                    />
                 </Button>
-
-                <Button className="cover-btn edit">
-                    <Edit fontSize="small" />
-                    Edit
-                </Button>
-
-                {/* <Button
-                    onClick={()=>handleRemove(covers._id)}
-                    className="cover-btn delete" >
-                    <Delete fontSize="small" />
-                    Remove
-                </Button> */}
             </div>
         </div>
     );

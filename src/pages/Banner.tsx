@@ -5,7 +5,12 @@ import { Link } from "react-router-dom";
 
 const Banner = () => {
     return (
-        <motion.div className="notion_section">
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+            className="notion_section">
             {/* Background Blobs */}
             <div className="bg_blob blob1"></div>
             <div className="bg_blob blob2"></div>
@@ -26,7 +31,7 @@ const Banner = () => {
                         <li>✨ Work Shedular</li>
                         <li>✨ Timer Learning Focus</li>
                         <li>✨ Smart Project Management</li>
-                        
+
                     </ul>
 
                     <Link to={'/dashboard'}>

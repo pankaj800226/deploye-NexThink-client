@@ -9,7 +9,6 @@ import EqualizerIcon from '@mui/icons-material/Equalizer';
 const menuItems = [
   { path: "/", label: "Home", icon: <HiHome /> },
   { path: "/dashboard", label: "Profile", icon: <GiCaptainHatProfile /> },
-  // { path: "/analyze", label: "Analyze", icon: <GiCaptainHatProfile /> },
 
 
 ];
@@ -21,6 +20,8 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 1100);
   const [todoIsOpen, setTodoIsOpen] = useState(false);
   const [analyzeIsOpen, setAnalyzeIsOpen] = useState(false);
+  const [projectIsOpen, setProjectIsOpen] = useState(false);
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -76,13 +77,13 @@ const Sidebar = () => {
               className="todo_toggle_btn"
               onClick={() => setAnalyzeIsOpen(!analyzeIsOpen)}
             >
-              <EqualizerIcon/> Analyze
+              <EqualizerIcon /> Analyze
               <span className="arrow">{analyzeIsOpen ? "▲" : "▼"}</span>
             </Button>
 
             <div className="submenu">
-              <Link to="/analyze"><DataExplorationIcon/> Todo Analyze</Link>
-              <Link to="/managetodo"><DataExplorationIcon/> Project Analyze</Link>
+              <Link to="/analyze"><DataExplorationIcon /> Todo Analyze</Link>
+              <Link to="/projectanalyzer"><DataExplorationIcon /> Project Analyze</Link>
             </div>
           </div>
 
@@ -99,7 +100,25 @@ const Sidebar = () => {
 
             <div className="submenu">
               <Link to="/createTodo">➕ Create Todo</Link>
-              <Link to="/managetodo">📋 Manage Todo</Link>
+              <Link to="/managetodo">🧑‍💼 Manage Todo</Link>
+            </div>
+          </div>
+
+          {/* project management  */}
+
+          <div className={`todo_toggle ${projectIsOpen ? "open" : ""}`}>
+            <Button
+              fullWidth
+              className="todo_toggle_btn"
+              onClick={() => setProjectIsOpen(!projectIsOpen)}
+            >
+              📽️ Project Manager
+              <span className="arrow">{projectIsOpen ? "▲" : "▼"}</span>
+            </Button>
+
+            <div className="submenu">
+              <Link to="/createProject">➕ Create Project</Link>
+              <Link to="/manageproject">🧑‍💼 Manage Project</Link>
             </div>
           </div>
 

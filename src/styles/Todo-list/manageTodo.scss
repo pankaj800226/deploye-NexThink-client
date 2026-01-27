@@ -44,7 +44,7 @@
       margin-top: 10px;
       color: #fff;
       font-size: 18px;
-      font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
     .description {
@@ -80,6 +80,16 @@
         }
       }
     }
+  }
+}
+
+.pagination_controls {
+  padding: 10px;
+
+  button {
+    color: white;
+    margin-top: 1rem;
+    padding: 10px 20px;
   }
 }
 

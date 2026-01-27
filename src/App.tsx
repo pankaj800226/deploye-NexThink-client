@@ -31,7 +31,12 @@ const TodoDetails = React.lazy(() => import('./pages/Todo-List/TodoDetails'))
 const CreateShedular = React.lazy(() => import('./pages/Work-Shedular/CreateShedular'))
 
 // analyze
-const Analyze = React.lazy(() => import('./pages/Analyze/Analyze'))
+const Analyze = React.lazy(() => import('./pages/Analyze/TodoAnalyze'))
+
+// project-management
+const CreateProject = React.lazy(() => import('./pages/project-management/CreateProject'))
+const ManageProject = React.lazy(() => import('./pages/project-management/ManageProject'))
+const ProjectAnalyzer = React.lazy(() => import('./pages/Analyze/ProjectAnalyzer'))
 
 
 
@@ -63,6 +68,9 @@ import './styles/think_drow.scss'
 import './styles/Analyze/analyze.scss'
 import './styles/Analyze/coverImg.scss'
 
+// project-management
+import './styles/project-management/allProject.scss'
+
 
 const AppLayout = () => {
   const location = useLocation()
@@ -75,6 +83,9 @@ const AppLayout = () => {
     "/todoEdit",
     "/todoDetails",
     "/analyze",
+    "/createProject",
+    "/manageproject",
+    "/projectanalyzer"
   ];
 
   // dashboard route check
@@ -114,12 +125,15 @@ const AppLayout = () => {
 
             {/* analyze */}
             <Route path='/analyze' element={<Analyze />} />
+            <Route path='/projectanalyzer' element={<ProjectAnalyzer/>}/>
+
+            {/* project-management */}
+            <Route path='/createProject' element={<CreateProject/>}/>
+            <Route path='/manageproject' element={<ManageProject/>}/>
 
 
 
           </Route>
-
-
 
         </Routes>
         <Toaster

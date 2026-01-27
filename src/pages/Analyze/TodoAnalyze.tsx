@@ -92,6 +92,16 @@ const ManageTodo = () => {
     visible: { width: `${progressPercent}%`, transition: { duration: 1 } }
   };
 
+  const getBadge = (completed: number) => {
+    if (completed >= 100) return { name: "Legendary", color: "#7f7f7f", icon: "💎" };
+    if (completed >= 75) return { name: "Epic", color: "#a52a2a", icon: "🔥" };
+    if (completed >= 35) return { name: "Golden", color: "#ffd700", icon: "🏆" };
+    return { name: "Silver", color: "#c0c0c0", icon: "🥈" };
+  };
+
+
+  const bedge = getBadge(completedCount)
+
   return (
     <div className="dashboard_container">
       <Sidebar />
@@ -121,6 +131,40 @@ const ManageTodo = () => {
             <p>{pendingCount}</p>
           </motion.div>
 
+          <motion.div className="stats_card badge" variants={cardVariants}>
+            <h2>Achievement</h2>
+            <div
+              style={{
+                background: `linear-gradient(135deg, ${bedge.color} 0%, #000 100%)`,
+                padding: "10px 20px",
+                borderRadius: "12px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "10px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+                color: "#fff",
+                fontWeight: "bold",
+                fontSize: "16px"
+              }}
+            >
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "50%",
+                  backgroundColor: "#fff",
+                  boxShadow: "0 0 8px rgba(255,255,255,0.8)",
+                  textAlign: "center",
+                  lineHeight: "24px",
+                  color: bedge.color
+                }}
+              >
+                {bedge.icon}
+              </span>
+              {bedge.name}
+            </div>
+          </motion.div>
           {/* PROGRESS BAR */}
           <motion.div className="progress_card" variants={cardVariants}>
             <div className="progress_header">

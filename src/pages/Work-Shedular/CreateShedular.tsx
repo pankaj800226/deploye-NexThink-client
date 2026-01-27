@@ -2,7 +2,7 @@ import { Add, Delete } from "@mui/icons-material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { api } from "../../api/api";
-import toast from "react-hot-toast";
+import toast, { LoaderIcon } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import ApiError from "../../components/ApiError";
 import Loading from "../../components/Loading";
@@ -123,7 +123,7 @@ export default function HabitTracker() {
                     onChange={e => setInput(e.target.value)}
                 />
                 <button onClick={handleAddTask}>
-                    {btnLoader ? 'Loading...' : <Add />}
+                    {btnLoader ? <LoaderIcon/> : <Add />}
                 </button>
             </div>
 
@@ -180,6 +180,7 @@ export default function HabitTracker() {
                                         );
                                         return (
                                             <tr key={wIndex}>
+                                                
                                                 <td>
                                                     Week {week.weekNo} <br />
                                                     <span>{month}</span>

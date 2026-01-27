@@ -1,6 +1,6 @@
-import Sidebar from "../../components/SideBar";
-// import EmojiPicker from 'emoji-picker-react'
-
+import { useState } from "react";
+import Sidebar from "../../components/SideBar"
+import { motion } from 'framer-motion'
 import {
     Box,
     Button,
@@ -10,33 +10,29 @@ import {
     Paper,
     CircularProgress
 } from "@mui/material";
-
 import { AddTask } from "@mui/icons-material";
-import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import ApiError from "../../components/ApiError";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { api } from "../../api/api";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import ApiError from "../../components/ApiError";
 
-const CreateTodo = () => {
+
+const CreateProject = () => {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        price: "",
         category: "",
         priority: "",
-        status: "",
-        createdAt: new Date().toISOString()
     })
+
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
     const [btnLoader, setBtnLoader] = useState(false)
+
     const token = localStorage.getItem('TOKEN')
-    const navigate = useNavigate()
+
     const [error, setError] = useState('')
-    // const [showEmoji, setShowEmoji] = useState(false);
-
-
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -47,53 +43,58 @@ const CreateTodo = () => {
         }))
     }
 
-    const handleCreateTodo = async () => {
-        const { title, description, price, category, priority, status } = formData
+    const navigate = useNavigate()
+
+    // create project
+    const handleProject = async () => {
 
         if (!token) {
             toast.error("You are not login")
             return navigate('/login')
         }
+        const { title, description, category, priority } = formData
 
-        if (!title || !description || !category || !priority || !status) {
-            return toast("All field are required")
+        if (!title || !description || !category || !priority || !startDate || !endDate) {
+            return toast.error("all field are required")
         }
 
         try {
             setBtnLoader(true)
 
-            await axios.post(`${api}/api/todo/createTodo`, {
+            await axios.post(`${api}/api/project/create/project`, {
                 title,
                 description,
-                price,
                 category,
                 priority,
-                status
+                startDate,
+                endDate
             }, {
                 headers: { Authorization: `Bearer ${token}` }
+
             })
 
-            toast.success("Task Create Sucessfully! 📩 Check Your Email!")
-            navigate('/managetodo')
-
-
+            toast.success("Project Created done")
         } catch (error) {
+            setError("api fetching error")
             console.log(error);
-            toast.error("Error creating todo")
-            setError("Api fetching error")
+            toast.error("error")
 
         } finally {
             setBtnLoader(false)
         }
 
+
     }
 
     if (error) return <ApiError error={error} />
 
+
     return (
         <div className="dashboard_container">
             <Sidebar />
+
             <main>
+
                 <Box
                     sx={{
                         minHeight: "100vh",
@@ -124,30 +125,44 @@ const CreateTodo = () => {
                                 color="#fff"
                                 fontWeight="bold"
                             >
-                                Create New Todo
+                                Create Project
                             </Typography>
 
-                        
+
                             {/* <EmojiPicker /> */}
-                            <TextField fullWidth label="Title" name="title"
+                            <TextField fullWidth label="Project Title" name="title"
                                 value={formData.title}
                                 onChange={handleChange}
                                 sx={inputStyle} />
 
-                            <TextField fullWidth type="number" label="Price (optional)" name="price"
-                                value={formData.price}
-                                onChange={handleChange}
+                            <TextField fullWidth type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
                                 sx={inputStyle} />
 
-                            <TextField fullWidth select label="Category" name="category"
+                            <TextField fullWidth type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                sx={inputStyle} />
+
+                            <TextField
+                                fullWidth
+                                select
+                                label="Project Type"
+                                name="category"
                                 value={formData.category}
                                 onChange={handleChange}
-                                sx={inputStyle}>
-                                <MenuItem value="Work">Work</MenuItem>
-                                <MenuItem value="Personal">Personal</MenuItem>
-                                <MenuItem value="Study">Study</MenuItem>
-                                <MenuItem value="Other">Other</MenuItem>
+                                sx={inputStyle}
+                            >
+                                <MenuItem value="software">Software Development</MenuItem>
+                                <MenuItem value="project">Project</MenuItem>
+                                <MenuItem value="design">Design</MenuItem>
+                                <MenuItem value="marketing">Marketing</MenuItem>
+                                <MenuItem value="testing">Testing / QA</MenuItem>
+                                <MenuItem value="research">Research</MenuItem>
+                                <MenuItem value="maintenance">Maintenance</MenuItem>
                             </TextField>
+
 
                             <TextField fullWidth select label="Priority" name="priority"
                                 value={formData.priority}
@@ -158,14 +173,6 @@ const CreateTodo = () => {
                                 <MenuItem value="High">High</MenuItem>
                             </TextField>
 
-                            <TextField fullWidth select label="Status" name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                                sx={inputStyle}>
-                                <MenuItem value="pending">Pending</MenuItem>
-                                <MenuItem value="inprogress">In Progress</MenuItem>
-                                <MenuItem value="completed">completed</MenuItem>
-                            </TextField>
 
                             <TextField fullWidth multiline rows={9} label="Description" name="description"
                                 value={formData.description}
@@ -181,8 +188,8 @@ const CreateTodo = () => {
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
                                     fullWidth
-                                    onClick={handleCreateTodo}
                                     variant="contained"
+                                    onClick={handleProject}
                                     startIcon={<AddTask />}
                                     sx={{
                                         mt: 3,
@@ -192,7 +199,7 @@ const CreateTodo = () => {
                                         borderRadius: 2
                                     }}
                                 >
-                                    {btnLoader ? <CircularProgress size={20} /> : "Add Todo"}
+                                    {btnLoader ? <CircularProgress size={20} /> : "Create Project"}
                                 </Button>
                             </motion.div>
                         </Paper>
@@ -200,8 +207,8 @@ const CreateTodo = () => {
                 </Box>
             </main>
         </div>
-    );
-};
+    )
+}
 
 const inputStyle = {
     mb: 2,
@@ -215,4 +222,4 @@ const inputStyle = {
     }
 };
 
-export default CreateTodo;
+export default CreateProject
