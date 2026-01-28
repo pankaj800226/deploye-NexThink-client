@@ -1,21 +1,154 @@
-.project_header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    input{
-        width: 90%;
-        padding: 15px;
-        outline: 0;
-        border: 0;
-        border-radius: 5px;
-        background-color: transparent;
-        border: 1.2px solid white;
-        color: white;
 
-        button{
-            background-color: palevioletred;
-            width: 20px;
-        }
+// VARIABLES
+$bg-main: #0F1214;
+$bg-card: #15191c;
+$bg-hover: #1b2024;
+$text-primary: #ffffff;
+$text-secondary: #a0a7ad;
+$accent: #3b82f6;
+$danger: #ef4444;
+$border-color: #22272b;
+$radius: 12px;
+
+
+
+
+// HEADER
+.project_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $bg-card;
+  padding: 1rem 1.25rem;
+  border-radius: $radius;
+  margin-bottom: 1.5rem;
+  border: 1px solid $border-color;
+
+  input {
+    background: $bg-main;
+    border: 1px solid $border-color;
+    color: $text-primary;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    width: 220px;
+    outline: none;
+
+    &::placeholder {
+      color: $text-secondary;
     }
+
+    &:focus {
+      border-color: $accent;
+    }
+  }
+
+  button {
+    background: $accent;
+    color: white;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 10px;
+
+    &:hover {
+      background: lighten($accent, 5%);
+    }
+  }
+}
+
+// PROJECT DETAILS CARD
+.project_details {
+  background: $bg-card;
+  border-radius: $radius;
+  padding: 1.75rem;
+  border: 1px solid $border-color;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+
+  h2 {
+    grid-column: 1 / -1;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: 0.95rem;
+  }
+
+  strong {
+    color: $accent;
+    font-weight: 600;
+  }
+
+  .description {
+    grid-column: 1 / -1;
+    line-height: 1.6;
+  }
+}
+
+// DIALOG (MUI OVERRIDES)
+.MuiDialog-paper {
+  background-color: $bg-card !important;
+  color: $text-primary;
+  border-radius: $radius;
+  border: 1px solid $border-color;
+}
+
+.MuiDialogTitle-root {
+  font-weight: 600;
+  border-bottom: 1px solid $border-color;
+}
+
+.MuiDialogContent-root {
+  padding-top: 1.25rem !important;
+}
+
+.MuiTextField-root {
+  .MuiInputBase-root {
+    background: $bg-main;
+    color: $text-primary;
+    border-radius: 8px;
+  }
+
+  label {
+    color: $text-secondary;
+  }
+
+  .MuiOutlinedInput-notchedOutline {
+    border-color: $border-color;
+  }
+
+  &:hover .MuiOutlinedInput-notchedOutline {
+    border-color: $accent;
+  }
+}
+
+// BUTTONS
+.MuiButton-contained {
+  background-color: $accent !important;
+
+  &:hover {
+    background-color: lighten($accent, 6%) !important;
+  }
+}
+
+.MuiButton-text {
+  color: $text-secondary !important;
+}
+
+// RESPONSIVE
+@media (max-width: 768px) {
+  main {
+    padding: 1rem;
+  }
+
+  .project_header {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    input {
+      width: 100%;
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/SideBar"
 import { motion } from 'framer-motion'
 import {
@@ -13,12 +13,12 @@ import {
 import { AddTask } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import ApiError from "../../components/ApiError";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { api } from "../../api/api";
 
 
-const CreateProject = () => {
+const ProjectEdit = () => {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -33,7 +33,7 @@ const CreateProject = () => {
     const token = localStorage.getItem('TOKEN')
 
     const [error, setError] = useState('')
-
+    const { id } = useParams()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -46,7 +46,30 @@ const CreateProject = () => {
 
     const navigate = useNavigate()
 
-    // create project
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                const res = await axios.get(`${api}/api/project/projectId/${id}`)
+                setFormData({
+                    title: res.data.title,
+                    description: res.data.description,
+                    category: res.data.category,
+                    priority: res.data.priority,
+                })
+
+                setStartDate(res.data.startDate)
+                setEndDate(res.data.endDate)
+
+            } catch (error) {
+                console.log(error);
+
+            }
+        }
+
+        fetchProject()
+    }, [])
+
+    //project edit
     const handleProject = async () => {
 
         if (!token) {
@@ -62,19 +85,16 @@ const CreateProject = () => {
         try {
             setBtnLoader(true)
 
-            await axios.post(`${api}/api/project/create/project`, {
+            await axios.put(`${api}/api/project/edit/project/${id}`, {
                 title,
                 description,
                 category,
                 priority,
                 startDate,
                 endDate
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-
             })
 
-            toast.success("Project Created done")
+            toast.success("Project Edit done")
             navigate('/manageproject')
         } catch (error) {
             setError("api fetching error")
@@ -127,9 +147,8 @@ const CreateProject = () => {
                                 color="#fff"
                                 fontWeight="bold"
                             >
-                                Create Project
+                                Project Edit
                             </Typography>
-
 
                             {/* <EmojiPicker /> */}
                             <TextField fullWidth label="Project Title" name="title"
@@ -185,7 +204,6 @@ const CreateProject = () => {
                             </TextField>
 
 
-
                             {/* Animate Add Todo Button */}
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
@@ -201,7 +219,7 @@ const CreateProject = () => {
                                         borderRadius: 2
                                     }}
                                 >
-                                    {btnLoader ? <CircularProgress size={20} /> : "Create Project"}
+                                    {btnLoader ? <CircularProgress size={20} /> : "Edit Project"}
                                 </Button>
                             </motion.div>
                         </Paper>
@@ -224,4 +242,4 @@ const inputStyle = {
     }
 };
 
-export default CreateProject
+export default ProjectEdit

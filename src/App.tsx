@@ -32,13 +32,15 @@ const CreateShedular = React.lazy(() => import('./pages/Work-Shedular/CreateShed
 
 // analyze
 const Analyze = React.lazy(() => import('./pages/Analyze/TodoAnalyze'))
+const ProjectAnalyzer = React.lazy(() => import('./pages/Analyze/ProjectAnalyzer'))
 
 // project-management
 const CreateProject = React.lazy(() => import('./pages/project-management/CreateProject'))
 const ManageProject = React.lazy(() => import('./pages/project-management/ManageProject'))
-const ProjectAnalyzer = React.lazy(() => import('./pages/Analyze/ProjectAnalyzer'))
-
-
+const ProjectDetails = React.lazy(() => import('./pages/project-management/ProjectDetails'))
+const ProjectEdit = React.lazy(() => import('./pages/project-management/ProjectEdit'))
+// feature
+const EditFeature = React.lazy(() => import('./pages/project-management/feature/EditFeature'))
 
 
 
@@ -70,6 +72,7 @@ import './styles/Analyze/coverImg.scss'
 
 // project-management
 import './styles/project-management/allProject.scss'
+import './styles/project-management/projectFeature.scss'
 
 
 const AppLayout = () => {
@@ -85,7 +88,9 @@ const AppLayout = () => {
     "/analyze",
     "/createProject",
     "/manageproject",
-    "/projectanalyzer"
+    "/projectanalyzer",
+    "/projectdetails",
+    "/editfeature",
   ];
 
   // dashboard route check
@@ -130,6 +135,11 @@ const AppLayout = () => {
             {/* project-management */}
             <Route path='/createProject' element={<CreateProject/>}/>
             <Route path='/manageproject' element={<ManageProject/>}/>
+            <Route path='/projectdetails/:id' element={<ProjectDetails/>}/>
+            <Route path='/projectedit/:id' element={<ProjectEdit/>}/>
+
+            {/* edit feature */}
+            <Route path='/editfeature/:id' element={<EditFeature/>}/>
 
 
 

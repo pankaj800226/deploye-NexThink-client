@@ -23,6 +23,8 @@ import axios from "axios";
 import { api } from "../../api/api";
 import Loading from "../../components/Loading";
 import ApiError from "../../components/ApiError";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 interface Project {
   _id: string;
@@ -39,8 +41,9 @@ const ManageProject = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  // const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
+
+  // project find
   const fetchTask = async () => {
     const token = localStorage.getItem("TOKEN");
     if (!token) return;
@@ -62,6 +65,36 @@ const ManageProject = () => {
   useEffect(() => {
     fetchTask();
   }, []);
+
+  const statusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "completed":
+        return "#22c55e"; // green
+      case "working":
+        return "#6a5af9"; // purple
+      case "pending":
+        return "#facc15"; // yellow
+      default:
+        return "#E0E0E0"; // default gray
+    }
+  };
+
+
+  // project delete
+  const handleDelete = async (id: string) => {
+    try {
+      await axios.delete(`${api}/api/project/project/delete/${id}`)
+
+      setAllProject((prev) => prev.filter((f) => f._id !== id))
+
+      toast.success("project delete sucessfully")
+
+    } catch (error) {
+      console.log(error);
+      toast.error('error')
+
+    }
+  }
 
   if (loader) return <Loading />;
   if (error) return <ApiError error={error} />;
@@ -112,7 +145,9 @@ const ManageProject = () => {
                   </TableCell>
                 )}
 
-                <TableCell sx={{ color: "#fff", fontWeight: "bold" }}>
+                <TableCell
+
+                  sx={{ color: "#fff", fontWeight: "bold" }}>
                   Status
                 </TableCell>
 
@@ -158,7 +193,11 @@ const ManageProject = () => {
                     )}
 
                     <TableCell
-                      sx={{ color: "#E0E0E0", borderColor: "#2A2E33" }}
+                      sx={{
+                        color: statusColor(project.status),
+                        fontWeight: "bold",
+                        borderColor: "#2A2E33",
+                      }}
                     >
                       {project.status}
                     </TableCell>
@@ -174,27 +213,33 @@ const ManageProject = () => {
                     <TableCell
                       align="center"
                       sx={{ borderColor: "#2A2E33" }}
+
                     >
                       {/* View */}
-                      <IconButton
-                        aria-label="view"
-                        size={isMobile ? "small" : "medium"}
-                        sx={{ color: "#4FC3F7" }}
-                      >
-                        <VisibilityIcon fontSize={isMobile ? "small" : "medium"} />
-                      </IconButton>
+                      <Link to={`/projectdetails/${project._id}`}>
+                        <IconButton
+                          aria-label="view"
+                          size={isMobile ? "small" : "medium"}
+                          sx={{ color: "#4FC3F7" }}
+                        >
+                          <VisibilityIcon fontSize={isMobile ? "small" : "medium"} />
+                        </IconButton>
+                      </Link>
 
                       {/* Edit */}
-                      <IconButton
-                        aria-label="edit"
-                        size={isMobile ? "small" : "medium"}
-                        sx={{ color: "#FFB74D" }}
-                      >
-                        <EditIcon fontSize={isMobile ? "small" : "medium"} />
-                      </IconButton>
+                      <Link to={`/projectedit/${project._id}`}>
+                        <IconButton
+                          aria-label="edit"
+                          size={isMobile ? "small" : "medium"}
+                          sx={{ color: "#FFB74D" }}
+                        >
+                          <EditIcon fontSize={isMobile ? "small" : "medium"} />
+                        </IconButton>
+                      </Link>
 
                       {/* Delete */}
                       <IconButton
+                        onClick={() => handleDelete(project._id)}
                         aria-label="delete"
                         size={isMobile ? "small" : "medium"}
                         sx={{ color: "#E57373" }}

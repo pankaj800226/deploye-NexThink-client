@@ -1,5 +1,5 @@
-import { useState } from "react";
-import Sidebar from "../../components/SideBar"
+import { useEffect, useState } from "react";
+import Sidebar from "../../../components/SideBar"
 import { motion } from 'framer-motion'
 import {
     Box,
@@ -12,28 +12,24 @@ import {
 } from "@mui/material";
 import { AddTask } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import ApiError from "../../components/ApiError";
-import { useNavigate } from "react-router-dom";
+import ApiError from "../../../components/ApiError";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { api } from "../../api/api";
+import { api } from "../../../api/api";
 
 
-const CreateProject = () => {
+const EditFeature = () => {
     const [formData, setFormData] = useState({
         title: "",
-        description: "",
-        category: "",
-        priority: "",
+        status: "",
     })
 
-    const [startDate, setStartDate] = useState('')
-    const [endDate, setEndDate] = useState('')
     const [btnLoader, setBtnLoader] = useState(false)
 
     const token = localStorage.getItem('TOKEN')
 
     const [error, setError] = useState('')
-
+    const { id } = useParams()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -46,35 +42,43 @@ const CreateProject = () => {
 
     const navigate = useNavigate()
 
-    // create project
-    const handleProject = async () => {
+    useEffect(() => {
+        const fetchProject = async () => {
+            try {
+                const res = await axios.get(`${api}/api/feature/featureId/${id}`)
+                setFormData({
+                    title: res.data.title,
+                    status: res.data.status,
+                })
+
+            } catch (error) {
+                console.log(error);
+                setError("api fetching error")
+
+            }
+        }
+
+        fetchProject()
+    }, [])
+
+    //project edit
+    const handleEdit = async () => {
 
         if (!token) {
             toast.error("You are not login")
             return navigate('/login')
         }
-        const { title, description, category, priority } = formData
-
-        if (!title || !description || !category || !priority || !startDate || !endDate) {
-            return toast.error("all field are required")
-        }
+        const { title, status } = formData
 
         try {
             setBtnLoader(true)
 
-            await axios.post(`${api}/api/project/create/project`, {
+            await axios.put(`${api}/api/feature/edit/feature/${id}`, {
                 title,
-                description,
-                category,
-                priority,
-                startDate,
-                endDate
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-
+                status,
             })
 
-            toast.success("Project Created done")
+            toast.success("Feature Edit done")
             navigate('/manageproject')
         } catch (error) {
             setError("api fetching error")
@@ -127,9 +131,8 @@ const CreateProject = () => {
                                 color="#fff"
                                 fontWeight="bold"
                             >
-                                Create Project
+                                Project Edit
                             </Typography>
-
 
                             {/* <EmojiPicker /> */}
                             <TextField fullWidth label="Project Title" name="title"
@@ -137,61 +140,22 @@ const CreateProject = () => {
                                 onChange={handleChange}
                                 sx={inputStyle} />
 
-                            <TextField fullWidth type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                sx={inputStyle} />
-
-                            <TextField fullWidth type="date"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                sx={inputStyle} />
-
                             <TextField
-                                fullWidth
-                                select
-                                label="Project Type"
-                                name="category"
-                                value={formData.category}
+                                name="status"
+                                value={formData.status}
                                 onChange={handleChange}
-                                sx={inputStyle}
-                            >
-                                <MenuItem value="software">Software Development</MenuItem>
-                                <MenuItem value="project">Project</MenuItem>
-                                <MenuItem value="design">Design</MenuItem>
-                                <MenuItem value="marketing">Marketing</MenuItem>
-                                <MenuItem value="testing">Testing / QA</MenuItem>
-                                <MenuItem value="research">Research</MenuItem>
-                                <MenuItem value="maintenance">Maintenance</MenuItem>
+                                fullWidth select label="Status">
+                                <MenuItem value="pending">Pending</MenuItem>
+                                <MenuItem value="working">Working</MenuItem>
+                                <MenuItem value="completed">Completed</MenuItem>
                             </TextField>
-
-
-                            <TextField fullWidth select label="Priority" name="priority"
-                                value={formData.priority}
-                                onChange={handleChange}
-                                sx={inputStyle}>
-                                <MenuItem value="Low">Low</MenuItem>
-                                <MenuItem value="Medium">Medium</MenuItem>
-                                <MenuItem value="High">High</MenuItem>
-                            </TextField>
-
-
-                            <TextField fullWidth multiline rows={9} label="Description" name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                sx={inputStyle}
-                            >
-
-                            </TextField>
-
-
 
                             {/* Animate Add Todo Button */}
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
                                     fullWidth
                                     variant="contained"
-                                    onClick={handleProject}
+                                    onClick={handleEdit}
                                     startIcon={<AddTask />}
                                     sx={{
                                         mt: 3,
@@ -201,7 +165,7 @@ const CreateProject = () => {
                                         borderRadius: 2
                                     }}
                                 >
-                                    {btnLoader ? <CircularProgress size={20} /> : "Create Project"}
+                                    {btnLoader ? <CircularProgress size={20} /> : "Edit Feature"}
                                 </Button>
                             </motion.div>
                         </Paper>
@@ -224,4 +188,4 @@ const inputStyle = {
     }
 };
 
-export default CreateProject
+export default EditFeature
