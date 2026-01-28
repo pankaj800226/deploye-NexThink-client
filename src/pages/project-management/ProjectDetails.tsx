@@ -19,6 +19,7 @@ import ApiError from "../../components/ApiError";
 import Loading from "../../components/Loading";
 import ProjectFeature from "./feature/ProjectFeature";
 import toast from "react-hot-toast";
+import CoverImg from "../Analyze/CoverImg";
 
 interface Project {
     _id: string
@@ -130,8 +131,10 @@ const ProjectDetails = () => {
             <Sidebar />
 
             <main>
+                <CoverImg/>
                 <div className="project_header">
-                    <input type="text" placeholder="Serach Feature" />
+                    <p>"💕Enjoy you works and complete your task"💓</p>
+                    {/* <input type="text" placeholder="Serach Feature" /> */}
 
                     <Button onClick={() => setEditDialogOpen(true)}>
                         <Upload />

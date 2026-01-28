@@ -1,1 +1,0 @@
-import{D as m,E as a}from"./index-CsUNMcKn.js";import{g as p}from"./getThemeProps-DwgxWsaW.js";const i=m();function n({props:t,name:r,defaultTheme:o,themeId:s}){let e=a(o);return s&&(e=e[s]||e),p({theme:e,name:r,props:t})}export{i as s,n as u};
