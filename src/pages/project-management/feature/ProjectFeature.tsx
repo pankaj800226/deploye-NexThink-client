@@ -16,15 +16,17 @@ interface Feature {
 }
 interface ids {
   id: string
+  refresh: boolean
 }
 
-const ProjectFeature: React.FC<ids> = ({ id }) => {
+const ProjectFeature: React.FC<ids> = ({ id,refresh }) => {
   const [allFeature, setAllFeature] = useState<Feature[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
 
   useEffect(() => {
+    if (!id) return
     const fetchFeature = async () => {
       try {
         setLoading(true)
@@ -39,7 +41,7 @@ const ProjectFeature: React.FC<ids> = ({ id }) => {
     }
 
     fetchFeature()
-  }, [])
+  }, [id,refresh])
 
 
   const handleDelete = async (id: string) => {
@@ -68,12 +70,12 @@ const ProjectFeature: React.FC<ids> = ({ id }) => {
           <h2 className="todo-title">All Feature</h2>
 
           {allFeature.length === 0 ? (
-            <div className="todo-empty">No todos yet 🚀</div>
+            <div className="todo-empty">No Feature yet 🚀</div>
           ) : (
             <ul className="todo-list">
-              {allFeature.map((feature, index) => (
+              {allFeature.map((feature) => (
                 <li
-                  key={index}
+                  key={feature._id}
                   className={`todo-item ${feature.status}`}
                 >
                   <div className="todo-left">

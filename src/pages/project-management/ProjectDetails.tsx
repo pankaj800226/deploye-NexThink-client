@@ -32,10 +32,7 @@ interface Project {
     description: string
 }
 
-// interface FeaturePayload {
-//     title: string;
-//     status: "pending" | "working" | "completed";
-// }
+
 
 const ProjectDetails = () => {
     const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -48,7 +45,7 @@ const ProjectDetails = () => {
     const [status, setStatus] = useState("pending");
     const [btnLoader, setBtnLoader] = useState(false)
     const token = localStorage.getItem('TOKEN')
-
+const [refreshFeature, setRefreshFeature] = useState(false)
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -107,6 +104,7 @@ const ProjectDetails = () => {
                         "aria-live": "polite",
                     },
                 });
+                setRefreshFeature(prev => !prev)
             }
 
             setEditDialogOpen(false)
@@ -157,7 +155,8 @@ const ProjectDetails = () => {
 
                 {/* // project feature */}
 
-                <ProjectFeature id={id!} />
+                {/* <ProjectFeature id={id!} /> */}
+                <ProjectFeature id={id!} refresh={refreshFeature} />
             </main>
 
             <Dialog
