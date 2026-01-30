@@ -69,8 +69,7 @@ const ManageTodo = () => {
     { name: "Pending", value: pendingCount }
   ];
 
-  if (loader) return <Loading />;
-  if (error) return <ApiError error={error} />;
+
 
   // Framer Motion Variants
   const containerVariants = {
@@ -101,6 +100,9 @@ const ManageTodo = () => {
 
 
   const bedge = getBadge(completedCount)
+
+  if (loader) return <Loading />;
+  if (error) return <ApiError error={error} />;
 
   return (
     <div className="dashboard_container">
