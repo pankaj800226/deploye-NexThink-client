@@ -24,7 +24,7 @@ type Task = {
   status: string;
 };
 
-const ManageTodo = () => {
+const Analyze = () => {
   const [allTask, setAllTask] = useState<Task[]>([]);
   const [loader, setLoader] = useState(false);
   const [error, setError] = useState("");
@@ -218,4 +218,4 @@ const ManageTodo = () => {
   );
 };
 
-export default ManageTodo;
+export default Analyze;

@@ -69,7 +69,7 @@ const ProjectAnalyzer = () => {
         { name: "working", value: pendingCount }
     ];
 
-   
+
 
     // Framer Motion Variants
     const containerVariants = {
@@ -102,7 +102,7 @@ const ProjectAnalyzer = () => {
     const bedge = getBadge(completedCount)
 
 
-     if (loader) return <Loading />;
+    if (loader) return <Loading />;
     if (error) return <ApiError error={error} />;
 
     return (
