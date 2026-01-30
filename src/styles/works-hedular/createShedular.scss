@@ -1,274 +1,221 @@
-/* ===== Root Theme ===== */
-$bg: #222;
-$card: #2a2a2a;
-$border: rgba(255, 255, 255, 0.08);
-$text: #eaeaea;
-$muted: #a1a1a1;
-$accent: #4f9cff;
-$success: #4ade80;
-
-/* ===== Layout ===== */
 .habit-wrapper {
-  min-height: 100vh;
-  padding: 20px;
-  color: $text;
-}
-
-/* ===== Input Box ===== */
-.habit-input {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
   display: flex;
-  gap: 12px;
-  margin-bottom: 30px;
+  flex-direction: column;
+  gap: 30px;
+  font-family: "Poppins", sans-serif;
+  color: #fff;
 
-  input {
-    flex: 1;
-    padding: 14px 16px;
-    background-color: transparent;
-    border: 1px solid $border;
-    border-radius: 10px;
-    color: $text;
-    font-size: 15px;
-    outline: none;
-
-    &::placeholder {
-      color: $muted;
-    }
-
-    &:focus {
-      border-color: $accent;
-    }
-  }
-
-  button {
-    padding: 14px 20px;
-    background: linear-gradient(135deg, $accent, #7ab6ff);
-    border: none;
-    border-radius: 10px;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 25px rgba(79, 156, 255, 0.35);
-    }
-  }
-}
-
-/* ===== Task Card ===== */
-.task-box {
-  // background: rgba(42, 42, 42, 0.85);
-  backdrop-filter: blur(10px);
-  border: 1px solid $border;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-
-  h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
-}
-
-/* ===== Table ===== */
-.habit-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-
-  thead {
-    th {
-      font-size: 13px;
-      font-weight: 500;
-      color: $muted;
-      padding: 12px 6px;
-    }
-  }
-
-  tbody {
-    tr {
-      transition: background 0.2s ease;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.02);
-      }
-    }
-
-    td {
-      padding: 12px 6px;
-      border-top: 1px solid $border;
-      position: relative;
-    }
-  }
-}
-
-/* ===== Week Column ===== */
-td:first-child {
-  text-align: left;
-  font-size: 14px;
-  font-weight: 500;
-
-  span {
-    font-size: 12px;
-    color: $muted;
-  }
-}
-
-/* ===== Checkbox (Notion Style) ===== */
-.check-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  input {
-    display: none;
-  }
-
-  span {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-    border: 1.5px solid $border;
-    background: transparent;
-    transition: all 0.2s ease;
-    position: relative;
-  }
-
-  &.checked span {
-    background: $success;
-    border-color: $success;
-
-    &::after {
-      content: "✓";
-      position: absolute;
-      color: #000;
-      font-size: 13px;
-      font-weight: 700;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-  }
-}
-
-/* ===== Date Label ===== */
-.date-label {
-  font-size: 11px;
-  color: $muted;
-  margin-top: 6px;
-}
-
-/* ===== Responsive Media Queries Only ===== */
-@media (max-width: 1024px) {
-  .habit-wrapper {
-    padding: 30px 20px;
-  }
-
+  // Input section
   .habit-input {
-    gap: 10px;
+    display: flex;
+    gap: 15px;
 
     input {
-      font-size: 14px;
-      padding: 12px 14px;
-    }
-
-    button {
-      font-size: 14px;
-      padding: 12px 16px;
-    }
-  }
-
-  .task-box {
-    padding: 18px;
-
-    h2 {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 50px;
+      border: none;
+      outline: none;
       font-size: 16px;
-    }
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
 
-    .habit-table {
-      thead th {
-        font-size: 12px;
-        padding: 10px 4px;
+      &::placeholder {
+        color: #aaa;
       }
 
-      tbody td {
-        font-size: 12px;
-        padding: 10px 4px;
+      &:focus {
+        box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        background: rgba(255, 255, 255, 0.1);
       }
     }
-  }
-}
 
-@media (max-width: 768px) {
-  .habit-wrapper {
-    padding: 20px 12px;
-  }
-
-  .habit-input {
-    flex-direction: column;
-
-    input,
     button {
-      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 50px;
+      padding: 0 25px;
+      font-size: 18px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+      }
+
+      svg {
+        font-size: 22px;
+      }
     }
   }
 
+  // Task card
   .task-box {
-    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-    h2 {
-      font-size: 15px;
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 7px 30px rgba(99, 102, 241, 0.6);
     }
 
-    .habit-table {
-      display: block;
-      overflow-x: auto;
-      width: 100%;
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
 
-      thead,
-      tbody,
-      tr,
-      th,
-      td {
-        display: block;
+      h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
       }
 
-      tr {
+      button {
+        background: rgba(248, 113, 113, 0.1);
+        color: #f87171;
+        border-radius: 50%;
+        padding: 6px;
+        min-width: 36px;
+        height: 36px;
         display: flex;
-        justify-content: flex-start;
-        gap: 10px;
-        padding-bottom: 8px;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          background: #f87171;
+          color: #fff;
+          transform: scale(1.1);
+        }
+
+        svg {
+          font-size: 20px;
+        }
+      }
+    }
+
+    // Habit table / week grid
+    .habit-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 5px;
+
+      th, td {
+        padding: 10px 5px;
+        font-size: 14px;
+        text-align: center;
+        color: #ddd;
       }
 
       th {
-        text-align: left;
+        font-weight: 500;
+        font-size: 13px;
+        color: #bbb;
       }
 
       td {
-        text-align: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        position: relative;
+        min-width: 40px;
+      }
+
+      // Custom checkbox
+      .check-label {
+        display: inline-block;
+        position: relative;
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+
+        input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+
+          &:checked + span {
+            background: #6366f1;
+            border-color: #6366f1;
+
+            &::after {
+              display: block;
+            }
+          }
+        }
+
+        span {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 22px;
+          height: 22px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 6px;
+          transition: all 0.3s ease;
+
+          &::after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 6px;
+            height: 12px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+          }
+        }
+      }
+
+      .date-label {
+        margin-top: 5px;
+        font-size: 12px;
+        color: #aaa;
       }
     }
   }
-}
 
-@media (max-width: 480px) {
-  .habit-wrapper {
-    padding: 15px 10px;
+  // Mobile horizontal scroll
+  @media screen and (max-width: 768px) {
+    .habit-table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 10px;
+    }
+
+    .task-box {
+      padding: 15px;
+    }
   }
 
-  .habit-input {
-    gap: 8px;
-  }
+  @media screen and (max-width: 480px) {
+    .habit-input {
+      flex-direction: column;
+      gap: 10px;
 
-  .task-box {
-    padding: 14px;
-
-    h2 {
-      font-size: 14px;
+      input, button {
+        width: 100%;
+      }
     }
   }
 }

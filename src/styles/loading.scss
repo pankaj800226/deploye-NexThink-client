@@ -17,13 +17,6 @@
   }
 
   .loader_bar {
-    width: 250px; /* bar width */
-    height: 6px;
-    background-color: #1f242b; /* track */
-    border-radius: 3px;
-    overflow: hidden;
-    position: relative;
-
     .loader_fill {
       width: 0%;
       height: 100%;

@@ -2,66 +2,90 @@ import { Button } from "@mui/material";
 import { ArrowRightAlt } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+const tasks = [
+  "Create a new task...",
+  "Plan today's goals...",
+  "Write project notes...",
+  "Start deep focus session..."
+];
 
 const Banner = () => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.3 }}
-            transition={{ duration: 0.6 }}
-            className="notion_section">
-            {/* Background Blobs */}
-            <div className="bg_blob blob1"></div>
-            <div className="bg_blob blob2"></div>
-            <div className="bg_blob blob3"></div>
+  const [text, setText] = useState("");
+  const [index, setIndex] = useState(0);
+  const [char, setChar] = useState(0);
 
-            <div className="notion_container">
-                {/* Left Content */}
-                <div className="notion_left">
-                    <h2>Organize everything in one place</h2>
-                    <p>
-                        Write, plan, track.
-                        NextThink gives you a distraction-free workspace
-                        to manage tasks, notes and projects and ect.
-                    </p>
+  useEffect(() => {
+    const current = tasks[index];
+    const typing = setTimeout(() => {
+      setText(current.slice(0, char + 1));
+      setChar((c) => c + 1);
+    }, 45); // slightly slower for production feel
 
-                    <ul>
-                        <li>✨ Clean task management</li>
-                        <li>✨ Work Shedular</li>
-                        <li>✨ Timer Learning Focus</li>
-                        <li>✨ Smart Project Management</li>
+    if (char === current.length) {
+      setTimeout(() => {
+        setChar(0);
+        setText("");
+        setIndex((i) => (i + 1) % tasks.length);
+      }, 1400);
+    }
+    return () => clearTimeout(typing);
+  }, [char, index]);
 
-                    </ul>
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      className="banner"
+    >
+      {/* Background Blobs */}
+      <div className="bg_blob blob1" />
+      <div className="bg_blob blob2" />
+      <div className="bg_blob blob3" />
 
-                    <Link to={'/dashboard'}>
-                        <Button startIcon={<ArrowRightAlt />} className="start_btn">
-                            💕 Get Started
-                        </Button>
-                    </Link>
-                </div>
+      <div className="container">
+        <div className="left">
+          <h2>Organize Everything in One Place</h2>
+          <p>
+            Write, plan, track. NextThink gives you a distraction-free workspace
+            to manage tasks, notes, and projects efficiently.
+          </p>
 
-                {/* Right Mock Editor */}
-                <div className="notion_right">
-                    <div className="editor_card">
-                        <div className="editor_header">
-                            <span className="dot red"></span>
-                            <span className="dot yellow"></span>
-                            <span className="dot green"></span>
-                        </div>
+          <ul>
+            <li>✨ Clean task management</li>
+            <li>✨ Smart scheduling</li>
+            <li>✨ Timer for focus sessions</li>
+            <li>✨ Efficient project tracking</li>
+          </ul>
 
-                        <div className="editor_body">
-                            <div className="line title">📄 Daily Planning</div>
-                            <div className="line">- Review yesterday’s tasks</div>
-                            <div className="line">- Plan top 3 priorities</div>
-                            <div className="line">- Deep work session</div>
-                            <div className="line">- Evening reflection</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
+          {/* Notion-style animated input */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="task_input"
+          >
+            <span className="plus">＋</span>
+            <span className="typing">{text}</span>
+            <span className="cursor" />
+          </motion.div>
+
+          {/* CTA Button */}
+          <Link to="/dashboard">
+            <Button
+              startIcon={<ArrowRightAlt />}
+              className="start_btn"
+              sx={{ color: "#fff" }}
+            >
+              Get Started
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </motion.section>
+  );
 };
 
 export default Banner;

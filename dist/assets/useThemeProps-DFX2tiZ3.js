@@ -1,0 +1,1 @@
+import{Q as m,S as a}from"./index-BW7gK_ch.js";import{g as p}from"./getThemeProps-C9y_DJLS.js";const i=m();function n({props:t,name:r,defaultTheme:o,themeId:s}){let e=a(o);return s&&(e=e[s]||e),p({theme:e,name:r,props:t})}export{i as s,n as u};

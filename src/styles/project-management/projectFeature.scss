@@ -13,15 +13,19 @@ $danger: #ef4444;
 // Make the wrapper expand full width
 .todo-wrapper {
   width: 100%;
-  max-width: 900px; // optional max width for large screens
 }
 
 // TITLE
 .todo-title {
+  margin-top: 10px;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 1.8rem;
+  text-transform: uppercase;
   font-size: 1.8rem;
   font-weight: 700;
   margin-bottom: 1rem;
-//   text-align: center;
+  margin-left: 8px;
+  // text-align: center;
 }
 
 // EMPTY STATE

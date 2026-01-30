@@ -1,96 +1,88 @@
 import * as React from 'react';
-import { Link, useNavigate } from "react-router-dom"
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import { Button } from "@mui/material";
-import { Login } from "@mui/icons-material";
-
+import { Link, useNavigate } from "react-router-dom";
+import { Button, IconButton } from "@mui/material";
+import { Login, Menu as MenuIcon, Close } from "@mui/icons-material";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const open = Boolean(anchorEl);
-    const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const email = localStorage.getItem('EMAIL');
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-    const handleClose = () => setAnchorEl(null);
-    
+  const logOut = () => {
+    localStorage.clear();
+    navigate('/login');
+  }
 
-    const email = localStorage.getItem('EMAIL')
+  return (
+    <header className="header">
+      {/* Logo */}
+      <div className="logo">
+        <Link to="/">
+          <img width={55} src="logo.png" alt="Logo" />
+        </Link>
+      </div>
 
-    const logOut = () => {
-        localStorage.removeItem('AVATAR')
-        localStorage.removeItem('EMAIL')
-        localStorage.removeItem('USERNAME')
-        localStorage.removeItem('USERID')
-        localStorage.removeItem('TOKEN')
-        navigate('/login')
+      {/* Desktop Links */}
+      <nav className="nav-links desktop-nav">
+        {email ? (
+          <>
+            <Link to="/timechallaner" className="nav-link">FocusMood</Link>
+            <Link to="/createshedular" className="nav-link">Work Scheduler</Link>
+            <Link to="/dashboard" className="nav-link">Dashboard</Link>
+            {/* <Button className="avatar-btn">
+              <span className="avatar-text">{email.charAt(0).toUpperCase()}</span>
+            </Button> */}
+            <Button className="logout-btn" onClick={logOut}>Logout</Button>
+          </>
+        ) : (
+          <Link to="/login">
+            <Button startIcon={<Login />}>Login</Button>
+          </Link>
+        )}
+      </nav>
 
-    }
+      {/* Mobile Hamburger */}
+      <IconButton className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
+        <MenuIcon sx={{ color: '#fff' }} />
+      </IconButton>
 
-    return (
-        <header>
-            {/* <div className='logo'> */}
-            <div>
-                <Link to={'/'}>
-                    <img width={55} src="logo.png" alt="" />
-                </Link>
-
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            className="mobile-sidebar"
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          >
+            <div className="sidebar-header">
+              <Link to="/" onClick={() => setSidebarOpen(false)}>
+                <img width={45} src="logo.png" alt="Logo" />
+              </Link>
+              <IconButton onClick={() => setSidebarOpen(false)}>
+                <Close sx={{ color: '#fff' }} />
+              </IconButton>
             </div>
 
-            {/* </div> */}
-
-
-            <nav>
-                {email ? (
-                    <div>
-                        {/* <MenuItem> */}
-                        <Link to={'/timechallaner'}>FocusMood</Link>
-                        <Link to={'/createshedular'}>Work Shedular</Link>
-                        {/* </MenuItem> */}
-                        <Button
-                            id="basic-button"
-                            aria-controls={open ? 'basic-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={open ? 'true' : undefined}
-                            onClick={handleClick}
-                        >
-                            <p>{email.charAt(0).toUpperCase()}</p>
-                        </Button>
-                        <Menu
-                            id="basic-menu"
-                            anchorEl={anchorEl}
-                            open={open}
-                            onClose={handleClose}
-                            slotProps={{
-                                list: {
-                                    'aria-labelledby': 'basic-button',
-                                },
-                            }}
-                        >
-                            <Link style={{color:"black"}} to={'/dashboard'}>
-                                <MenuItem onClick={handleClose}>Dashboard</MenuItem>
-                            </Link>
-
-
-                            <MenuItem onClick={logOut}>Logout</MenuItem>
-
-
-                        </Menu>
-                    </div>
-                ) : (
-                    <Link to={'/login'}>
-                        <Button
-                            startIcon={<Login />}
-                        >
-                            Login
-                        </Button>
-                    </Link>
-
-                )
-                }
-            </nav>
-        </header>
-    )
+            <div className="sidebar-links">
+              {email ? (
+                <>
+                  <Link to="/timechallaner" onClick={() => setSidebarOpen(false)}>FocusMood</Link>
+                  <Link to="/createshedular" onClick={() => setSidebarOpen(false)}>Work Scheduler</Link>
+                  <Link to="/dashboard" onClick={() => setSidebarOpen(false)}>Dashboard</Link>
+                  <Button className="sidebar-logout-btn" onClick={logOut}>Logout</Button>
+                </>
+              ) : (
+                <Link to="/login" onClick={() => setSidebarOpen(false)}>Login</Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
 }
 
-export default Header
+export default Header;

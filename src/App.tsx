@@ -54,6 +54,8 @@ import './styles/banner.scss'
 import './styles/feature.scss'
 import './styles/register.scss'
 import './styles/profile.scss'
+import './styles/feedback.scss'
+
 
 // task
 import './styles/Todo-list/manageTodo.scss'

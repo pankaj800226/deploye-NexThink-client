@@ -5,7 +5,6 @@ import ApiError from "../../../components/ApiError"
 import Loading from "../../../components/Loading"
 import { Button } from "@mui/material"
 import { Delete, Edit } from "@mui/icons-material"
-import Sidebar from "../../../components/SideBar"
 import toast from "react-hot-toast"
 import { Link } from "react-router-dom"
 
@@ -62,10 +61,8 @@ const ProjectFeature: React.FC<ids> = ({ id,refresh }) => {
   if (loading) return <Loading />
 
   return (
-    <div className="dashboard_container">
-      <Sidebar />
+    <div>
 
-      <main>
         <div className="todo-wrapper">
           <h2 className="todo-title">All Feature</h2>
 
@@ -105,7 +102,6 @@ const ProjectFeature: React.FC<ids> = ({ id,refresh }) => {
             </ul>
           )}
         </div>
-      </main>
 
     </div>
   )

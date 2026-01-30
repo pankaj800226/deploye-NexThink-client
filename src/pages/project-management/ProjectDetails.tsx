@@ -45,7 +45,7 @@ const ProjectDetails = () => {
     const [status, setStatus] = useState("pending");
     const [btnLoader, setBtnLoader] = useState(false)
     const token = localStorage.getItem('TOKEN')
-const [refreshFeature, setRefreshFeature] = useState(false)
+    const [refreshFeature, setRefreshFeature] = useState(false)
 
     useEffect(() => {
         const fetchProject = async () => {
@@ -129,7 +129,7 @@ const [refreshFeature, setRefreshFeature] = useState(false)
             <Sidebar />
 
             <main>
-                <CoverImg/>
+                <CoverImg />
                 <div className="project_header">
                     <p>"💕Enjoy you works and complete your task"💓</p>
                     {/* <input type="text" placeholder="Serach Feature" /> */}

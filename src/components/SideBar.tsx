@@ -5,12 +5,14 @@ import { Button } from "@mui/material";
 import { GiCaptainHatProfile } from "react-icons/gi";
 import DataExplorationIcon from '@mui/icons-material/DataExploration';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import FolderCopyIcon from '@mui/icons-material/FolderCopy';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 
 const menuItems = [
-  { path: "/", label: "Home", icon: <HiHome /> },
-  { path: "/dashboard", label: "Profile", icon: <GiCaptainHatProfile /> },
-
-
+  { path: "/", label: "Home", icon: <HiHome size={20} /> },
+  { path: "/dashboard", label: "Profile", icon: <GiCaptainHatProfile size={20} /> },
 ];
 
 const Sidebar = () => {
@@ -21,7 +23,6 @@ const Sidebar = () => {
   const [todoIsOpen, setTodoIsOpen] = useState(false);
   const [analyzeIsOpen, setAnalyzeIsOpen] = useState(false);
   const [projectIsOpen, setProjectIsOpen] = useState(false);
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -44,8 +45,9 @@ const Sidebar = () => {
       )}
 
       <aside
-        className={`sideMenu ${isMobile ? "sideMenu-Mobile" : ""} ${isOpen ? "sideMenu-open" : "sideMenu-closed"
-          }`}
+        className={`sideMenu ${isMobile ? "sideMenu-Mobile" : ""} ${
+          isOpen ? "sideMenu-open" : "sideMenu-closed"
+        }`}
       >
         {isMobile && (
           <div className="sideMenu__header">
@@ -61,8 +63,9 @@ const Sidebar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`sideMenu__link ${location.pathname === item.path ? "active" : ""
-                }`}
+              className={`sideMenu__link ${
+                location.pathname === item.path ? "active" : ""
+              }`}
               onClick={() => isMobile && setIsOpen(false)}
             >
               <span className="sideMenu__icon">{item.icon}</span>
@@ -76,14 +79,19 @@ const Sidebar = () => {
               fullWidth
               className="todo_toggle_btn"
               onClick={() => setAnalyzeIsOpen(!analyzeIsOpen)}
+              startIcon={<EqualizerIcon />}
             >
-              <EqualizerIcon /> Analyze
+              Analyze
               <span className="arrow">{analyzeIsOpen ? "▲" : "▼"}</span>
             </Button>
 
             <div className="submenu">
-              <Link to="/analyze"><DataExplorationIcon /> Todo Analyze</Link>
-              <Link to="/projectanalyzer"><DataExplorationIcon /> Project Analyze</Link>
+              <Link to="/analyze">
+                <DataExplorationIcon /> Todo Analyze
+              </Link>
+              <Link to="/projectanalyzer">
+                <DataExplorationIcon /> Project Analyze
+              </Link>
             </div>
           </div>
 
@@ -93,36 +101,43 @@ const Sidebar = () => {
               fullWidth
               className="todo_toggle_btn"
               onClick={() => setTodoIsOpen(!todoIsOpen)}
+              startIcon={<PlaylistAddIcon />}
             >
-              📝 Todo Manager
+              Todo Manager
               <span className="arrow">{todoIsOpen ? "▲" : "▼"}</span>
             </Button>
 
             <div className="submenu">
-              <Link to="/createTodo">➕ Create Todo</Link>
-              <Link to="/managetodo">🧑‍💼 Manage Todo</Link>
+              <Link to="/createTodo">
+                <PlaylistAddIcon /> Create Todo
+              </Link>
+              <Link to="/managetodo">
+                <ManageAccountsIcon /> Manage Todo
+              </Link>
             </div>
           </div>
 
-          {/* project management  */}
-
+          {/* PROJECT MANAGEMENT DROPDOWN */}
           <div className={`todo_toggle ${projectIsOpen ? "open" : ""}`}>
             <Button
               fullWidth
               className="todo_toggle_btn"
               onClick={() => setProjectIsOpen(!projectIsOpen)}
+              startIcon={<FolderCopyIcon />}
             >
-              📽️ Project Manager
+              Project Manager
               <span className="arrow">{projectIsOpen ? "▲" : "▼"}</span>
             </Button>
 
             <div className="submenu">
-              <Link to="/createProject">➕ Create Project</Link>
-              <Link to="/manageproject">🧑‍💼 Manage Project</Link>
+              <Link to="/createProject">
+                <FolderCopyIcon /> Create Project
+              </Link>
+              <Link to="/manageproject">
+                <FolderOpenIcon /> Manage Project
+              </Link>
             </div>
           </div>
-
-
         </nav>
       </aside>
 

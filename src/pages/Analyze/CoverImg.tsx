@@ -1,4 +1,4 @@
-import {Upload } from "@mui/icons-material";
+import { Upload } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import coverImg from "../../assets/cover.jpg";
 import { useEffect, useState } from "react";
@@ -42,16 +42,17 @@ const CoverImg = () => {
 
         if (!selectedFile) return;
 
-        const maxSize = 1000 * 1024;
+        const maxSize = 1 * 1024 * 1024; // 1 MB in bytes
 
         if (selectedFile.size > maxSize) {
-            toast("File size must be less than 800 KB");
+            toast("File size must be less than 1 MB");
             e.target.value = ""; // reset input
             return;
         }
 
         setFile(selectedFile);
     };
+
 
 
     useEffect(() => {
