@@ -1,18 +1,25 @@
 import * as React from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button, IconButton } from "@mui/material";
 import { Login, Menu as MenuIcon, Close } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [email, setEmail] = React.useState<string | null>(null);
+
   const navigate = useNavigate();
-  const email = localStorage.getItem('EMAIL');
+  const location = useLocation(); 
+
+  React.useEffect(() => {
+    setEmail(localStorage.getItem('EMAIL'));
+  }, [location]);
 
   const logOut = () => {
     localStorage.clear();
+    setEmail(null);
     navigate('/login');
-  }
+  };
 
   return (
     <header className="header">
@@ -30,9 +37,7 @@ const Header = () => {
             <Link to="/timechallaner" className="nav-link">FocusMood</Link>
             <Link to="/createshedular" className="nav-link">Work Scheduler</Link>
             <Link to="/dashboard" className="nav-link">Dashboard</Link>
-            {/* <Button className="avatar-btn">
-              <span className="avatar-text">{email.charAt(0).toUpperCase()}</span>
-            </Button> */}
+
             <Button className="logout-btn" onClick={logOut}>Logout</Button>
           </>
         ) : (
@@ -43,7 +48,10 @@ const Header = () => {
       </nav>
 
       {/* Mobile Hamburger */}
-      <IconButton className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
+      <IconButton
+        className="mobile-menu-btn"
+        onClick={() => setSidebarOpen(true)}
+      >
         <MenuIcon sx={{ color: '#fff' }} />
       </IconButton>
 
@@ -72,7 +80,13 @@ const Header = () => {
                   <Link to="/timechallaner" onClick={() => setSidebarOpen(false)}>FocusMood</Link>
                   <Link to="/createshedular" onClick={() => setSidebarOpen(false)}>Work Scheduler</Link>
                   <Link to="/dashboard" onClick={() => setSidebarOpen(false)}>Dashboard</Link>
-                  <Button className="sidebar-logout-btn" onClick={logOut}>Logout</Button>
+
+                  <Button
+                    className="sidebar-logout-btn"
+                    onClick={logOut}
+                  >
+                    Logout
+                  </Button>
                 </>
               ) : (
                 <Link to="/login" onClick={() => setSidebarOpen(false)}>Login</Link>
@@ -83,6 +97,6 @@ const Header = () => {
       </AnimatePresence>
     </header>
   );
-}
+};
 
 export default Header;
