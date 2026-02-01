@@ -43,6 +43,9 @@ const ProjectEdit = React.lazy(() => import('./pages/project-management/ProjectE
 const EditFeature = React.lazy(() => import('./pages/project-management/feature/EditFeature'))
 
 
+// routing gols 
+const Routing = React.lazy(() => import('./pages/Routine/Routine'))
+
 
 
 // style configration
@@ -75,6 +78,9 @@ import './styles/Analyze/coverImg.scss'
 // project-management
 import './styles/project-management/allProject.scss'
 import './styles/project-management/projectFeature.scss'
+
+// routing
+import './styles/routine/routine.scss'
 
 
 const AppLayout = () => {
@@ -142,6 +148,10 @@ const AppLayout = () => {
 
             {/* edit feature */}
             <Route path='/editfeature/:id' element={<EditFeature/>}/>
+
+            {/* routing gols  */}
+            <Route path='/routing' element={<Routing/>}/>
+
 
 
 

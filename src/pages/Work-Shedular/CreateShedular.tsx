@@ -123,7 +123,7 @@ export default function HabitTracker() {
                     onChange={e => setInput(e.target.value)}
                 />
                 <button onClick={handleAddTask}>
-                    {btnLoader ? <LoaderIcon/> : <Add />}
+                    {btnLoader ? <LoaderIcon /> : <Add />}
                 </button>
             </div>
 
@@ -180,7 +180,7 @@ export default function HabitTracker() {
                                         );
                                         return (
                                             <tr key={wIndex}>
-                                                
+
                                                 <td>
                                                     Week {week.weekNo} <br />
                                                     <span>{month}</span>

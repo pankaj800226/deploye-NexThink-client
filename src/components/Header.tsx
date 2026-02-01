@@ -34,9 +34,11 @@ const Header = () => {
       <nav className="nav-links desktop-nav">
         {email ? (
           <>
+            <Link to="/routing" className="nav-link">Routine</Link>
             <Link to="/timechallaner" className="nav-link">FocusMood</Link>
             <Link to="/createshedular" className="nav-link">Work Scheduler</Link>
             <Link to="/dashboard" className="nav-link">Dashboard</Link>
+
 
             <Button className="logout-btn" onClick={logOut}>Logout</Button>
           </>
@@ -77,6 +79,7 @@ const Header = () => {
             <div className="sidebar-links">
               {email ? (
                 <>
+            <Link to="/routing" className="nav-link">Routine</Link>
                   <Link to="/timechallaner" onClick={() => setSidebarOpen(false)}>FocusMood</Link>
                   <Link to="/createshedular" onClick={() => setSidebarOpen(false)}>Work Scheduler</Link>
                   <Link to="/dashboard" onClick={() => setSidebarOpen(false)}>Dashboard</Link>
