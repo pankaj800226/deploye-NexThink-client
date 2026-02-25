@@ -1,1 +1,0 @@
-import{N as m}from"./index-C7mS5LSR.js";import{g as a}from"./getThemeProps-zvFPX5P8.js";import{a as p}from"./Paper-DY8s2CNN.js";const n=m();function c({props:s,name:t,defaultTheme:o,themeId:r}){let e=p(o);return r&&(e=e[r]||e),a({theme:e,name:t,props:s})}export{n as s,c as u};

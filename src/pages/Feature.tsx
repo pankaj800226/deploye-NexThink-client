@@ -1,11 +1,12 @@
 import { Dashboard, TaskAlt, Timer, Work } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import { Bolt, Keyboard } from "lucide-react";
 
 const Feature = () => {
   const data = [
     {
       icon: <TaskAlt />,
-      title: "Smart Task Management",
+      title: "Task Management",
       gradient: "linear-gradient(135deg, #6a5af9, #00e5ff)",
       des: "Organize your work with smart task lists, priorities, and completion tracking",
     },
@@ -33,7 +34,23 @@ const Feature = () => {
       title: "Work Scheduler",
       gradient: "linear-gradient(135deg, #b5177b, #ff7043)",
       des: "Plan your day efficiently with a smart work scheduler that keeps your tasks and projects on track",
+    },
+
+    {
+      icon: <Bolt />,
+      title: "Your Routine",
+      gradient: "linear-gradient(135deg, #c70cec, #e61655)",
+      des: "Create and manage your routines with ease.",
+    },
+
+    {
+      icon: <Keyboard />,
+      title: "Keyboard-Driven Navigation",
+      gradient: "linear-gradient(135deg, #00c6ff, #0072ff)",
+      des: "Navigate instantly using Ctrl + K command palette and productivity shortcuts.",
     }
+
+
 
   ];
 

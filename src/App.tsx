@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Loading from './components/Loading'
 import { Toaster } from 'react-hot-toast'
 import SaveRoute from './protectedRoute/SaveRoute'
+import CommandPalette from './pages/CommandPalette'
 
 
 // pages configration
@@ -58,6 +59,8 @@ import './styles/feature.scss'
 import './styles/register.scss'
 import './styles/profile.scss'
 import './styles/feedback.scss'
+import './styles/commandPalette.scss'
+
 
 
 // task
@@ -110,6 +113,7 @@ const AppLayout = () => {
     <>
       {!hideHeader && <Header />}
       <Suspense fallback={<Loading />}>
+      <CommandPalette/>
 
         <Routes>
           <Route path='/register' element={<Register />} />

@@ -131,7 +131,7 @@ const EditFeature = () => {
                                 color="#fff"
                                 fontWeight="bold"
                             >
-                                Project Edit
+                                Feature Edit
                             </Typography>
 
                             {/* <EmojiPicker /> */}
