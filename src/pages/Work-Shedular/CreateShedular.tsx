@@ -73,29 +73,6 @@ export default function HabitTracker() {
         }
     };
 
-    // toggle check tick
-    const toggleCheck = async (
-        taskId: string,
-        weekNo: number,
-        dayIndex: number,
-        checked: boolean
-    ) => {
-        try {
-            const res = await axios.put(
-                `${api}/api/shedular/check`,
-                { taskId, weekNo, dayIndex, checked },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            setTasks(prev =>
-                prev.map(task => (task._id === taskId ? res.data.task : task))
-            );
-        } catch {
-            toast.error("Failed to update");
-            setError("API fetch error");
-        }
-    };
-
     // delete shedular
     const handleDelete = async (id: string) => {
         try {
@@ -195,7 +172,26 @@ export default function HabitTracker() {
                                                                 type="checkbox"
                                                                 checked={day.checked}
                                                                 onChange={e =>
-                                                                    toggleCheck(
+                                                                    (async (
+                                                                        taskId: string,
+                                                                        weekNo: number,
+                                                                        dayIndex: number,
+                                                                        checked: boolean
+                                                                    ) => {
+                                                                        try {
+                                                                            const res = await axios.put(
+                                                                                `${api}/api/shedular/check`,
+                                                                                { taskId, weekNo, dayIndex, checked },
+                                                                                { headers: { Authorization: `Bearer ${token}` } }
+                                                                            );
+
+                                                                            setTasks(prev => prev.map(task => (task._id === taskId ? res.data.task : task))
+                                                                            );
+                                                                        } catch {
+                                                                            toast.error("Failed to update");
+                                                                            setError("API fetch error");
+                                                                        }
+                                                                    })(
                                                                         task._id,
                                                                         week.weekNo,
                                                                         dIndex,

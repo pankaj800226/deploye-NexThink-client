@@ -18,7 +18,7 @@ const CoverImg = () => {
     const token = localStorage.getItem('TOKEN')
     const [covers, setCovers] = useState<Cover | null>(null)
 
-
+    // fetch cover image 
     const fetchCover = async () => {
         try {
             const res = await axios.get(`${api}/api/coverImg/getImg`, {
@@ -31,12 +31,12 @@ const CoverImg = () => {
         }
     }
 
-
     useEffect(() => {
         fetchCover()
     }, [])
 
 
+    // handle image file
     const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
 
@@ -54,10 +54,9 @@ const CoverImg = () => {
     };
 
 
-
+    // handle cover image
     useEffect(() => {
         if (!file) return
-
         const handleUpload = async () => {
             try {
                 setUploading(true);
