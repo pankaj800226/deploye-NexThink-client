@@ -1,0 +1,134 @@
+// VARIABLES
+$bg-main: #0F1214;
+$bg-card: #15191c;
+$text-primary: #ffffff;
+$text-secondary: #9aa4af;
+$accent: #3b82f6;
+$border: #262c33;
+$radius: 16px;
+
+
+// HEADER
+.project_page_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 2rem 0;
+
+  .header_intro {
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0;
+      color: $text-primary;
+    }
+    .subtitle {
+      color: $text-secondary;
+      margin-top: 4px;
+    }
+  }
+
+  .action_btn {
+    border-radius: 10px;
+    padding: 10px 20px;
+    text-transform: none;
+    font-weight: 600;
+    background-color: $accent !important;
+  }
+}
+
+// SUMMARY CARD
+.project_card_summary {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+
+  .info_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+
+    .info_tile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .tile_icon {
+        color: $accent;
+        background: rgba($accent, 0.1);
+        padding: 8px;
+        border-radius: 10px;
+        font-size: 2.2rem;
+      }
+
+      .tile_content {
+        display: flex;
+        flex-direction: column;
+
+        label {
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          color: $text-secondary;
+          letter-spacing: 0.5px;
+        }
+
+        span {
+          font-weight: 600;
+          color: $text-primary;
+        }
+
+        .status_label {
+          text-transform: capitalize;
+          color: $accent;
+        }
+      }
+    }
+  }
+
+  .description_section {
+    .desc_header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $text-secondary;
+      margin-bottom: 8px;
+    }
+    p {
+      line-height: 1.6;
+      color: lighten($text-secondary, 10%);
+      margin: 0;
+    }
+  }
+}
+
+// FEATURES WRAPPER
+.features_wrapper {
+  margin-top: 2.5rem;
+}
+
+// DARK DIALOG OVERRIDES
+.dark_dialog {
+  background-color: $bg-card !important;
+  color: $text-primary !important;
+  border: 1px solid $border;
+
+  .MuiTypography-root { color: $text-primary; }
+  .MuiInputBase-input { color: $text-primary; }
+  .MuiInputLabel-root { color: $text-secondary; }
+  .MuiOutlinedInput-notchedOutline { border-color: $border; }
+}
+
+// RESPONSIVE
+@media (max-width: 600px) {
+  .project_page_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    .action_btn { width: 100%; }
+  }
+  .info_grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

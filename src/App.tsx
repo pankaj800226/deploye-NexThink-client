@@ -15,7 +15,6 @@ const ForgetPassword = React.lazy(() => import('./components/auth/ForgetPassword
 const OtpVerify = React.lazy(() => import('./components/auth/OtpVerify'))
 const UpdatePassword = React.lazy(() => import('./components/auth/UpdatePassword'))
 const TimerChallanger = React.lazy(() => import('./pages/TimerChallanger'))
-const Think_Drow = React.lazy(() => import('./pages/Think_Drow'))
 
 
 
@@ -23,10 +22,10 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'))
 const Profile = React.lazy(() => import('./pages/Profile'))
 
 // todo list
-const CreateTodo = React.lazy(() => import('./pages/Todo-List/CreateTodo'))
-const ManageTodo = React.lazy(() => import('./pages/Todo-List/ManageTodo'))
-const TodoEdit = React.lazy(() => import('./pages/Todo-List/TodoEdit'))
-const TodoDetails = React.lazy(() => import('./pages/Todo-List/TodoDetails'))
+const CreateTodo = React.lazy(() => import('./pages/Task-management/CreateTodo'))
+const ManageTodo = React.lazy(() => import('./pages/Task-management/ManageTodo'))
+const TodoEdit = React.lazy(() => import('./pages/Task-management/TodoEdit'))
+const TodoDetails = React.lazy(() => import('./pages/Task-management/TodoDetails'))
 
 {/* work shedular */ }
 const CreateShedular = React.lazy(() => import('./pages/Work-Shedular/CreateShedular'))
@@ -64,23 +63,26 @@ import './styles/commandPalette.scss'
 
 
 // task
-import './styles/Todo-list/manageTodo.scss'
-import './styles/Todo-list/todoDetails.scss'
+import './styles/Task-management/manageTodo.scss'
+import './styles/Task-management/createTask.scss'
+import './styles/Task-management/todoDetails.scss'
+
+
 // time challanger
 import './styles/timechallange.scss'
 // work shedular
 import './styles/works-hedular/createShedular.scss'
 
-//think drow
-import './styles/think_drow.scss'
 
 // anzlyze
 import './styles/Analyze/analyze.scss'
 import './styles/Analyze/coverImg.scss'
 
 // project-management
-import './styles/project-management/allProject.scss'
-import './styles/project-management/projectFeature.scss'
+import './styles/project-management/manageProject.scss'
+import './styles/project-management/projectDetails.scss'
+import './styles/project-management/allFeature.scss'
+
 
 // routing
 import './styles/routine/routine.scss'
@@ -101,6 +103,7 @@ const AppLayout = () => {
     "/manageproject",
     "/projectanalyzer",
     "/projectdetails",
+    "/projectedit",
     "/editfeature",
   ];
 
@@ -113,7 +116,7 @@ const AppLayout = () => {
     <>
       {!hideHeader && <Header />}
       <Suspense fallback={<Loading />}>
-      <CommandPalette/>
+        <CommandPalette />
 
         <Routes>
           <Route path='/register' element={<Register />} />
@@ -126,7 +129,6 @@ const AppLayout = () => {
           <Route element={<SaveRoute />}>
             <Route path='/' element={<Home />} />
             <Route path='/timechallaner' element={<TimerChallanger />} />
-            <Route path='/thinkdrow' element={<Think_Drow />} />
 
             {/*In dashboard all page will be here */}
             <Route path='/dashboard' element={<Dashboard />} />
@@ -142,19 +144,19 @@ const AppLayout = () => {
 
             {/* analyze */}
             <Route path='/analyze' element={<Analyze />} />
-            <Route path='/projectanalyzer' element={<ProjectAnalyzer/>}/>
+            <Route path='/projectanalyzer' element={<ProjectAnalyzer />} />
 
             {/* project-management */}
-            <Route path='/createProject' element={<CreateProject/>}/>
-            <Route path='/manageproject' element={<ManageProject/>}/>
-            <Route path='/projectdetails/:id' element={<ProjectDetails/>}/>
-            <Route path='/projectedit/:id' element={<ProjectEdit/>}/>
+            <Route path='/createProject' element={<CreateProject />} />
+            <Route path='/manageproject' element={<ManageProject />} />
+            <Route path='/projectdetails/:id' element={<ProjectDetails />} />
+            <Route path='/projectedit/:id' element={<ProjectEdit />} />
 
             {/* edit feature */}
-            <Route path='/editfeature/:id' element={<EditFeature/>}/>
+            <Route path='/editfeature/:id' element={<EditFeature />} />
 
             {/* routing gols  */}
-            <Route path='/routing' element={<Routing/>}/>
+            <Route path='/routing' element={<Routing />} />
 
 
 

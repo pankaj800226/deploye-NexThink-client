@@ -15,23 +15,40 @@ interface Block {
   type: BlockType;
   text?: string;
   done?: boolean;
+  sectionId: number;
 }
 
 const Routine: React.FC = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("TOKEN");
   const [error, setError] = useState("");
 
-  /* ---------------- LOAD ---------------- */
+  const token = localStorage.getItem("TOKEN");
+
+  const [currentSectionId, setCurrentSectionId] = useState<number>(
+    () => Date.now()
+  );
+
+  /* ================= LOAD ================= */
+
   useEffect(() => {
     const loadRoutine = async () => {
       try {
-        const { data } = await axios.get(`${api}/api/routen/createRoutine`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          `${api}/api/routen/createRoutine`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-        setBlocks(data.blocks || []);
+        const loadedBlocks = data.blocks || [];
+        setBlocks(loadedBlocks);
+
+        const lastDivider = loadedBlocks.findLast(
+          (b: Block) => b.type === "divider"
+        );
+
+        if (lastDivider) setCurrentSectionId(lastDivider.id);
       } catch {
         toast.error("Failed to load routine");
         setError("Failed to load routine");
@@ -43,59 +60,95 @@ const Routine: React.FC = () => {
     loadRoutine();
   }, [token]);
 
-  /* ---------------- SAVE ---------------- */
+  /* ================= SAVE ================= */
+
   const saveRoutine = async (blocks: Block[]) => {
     try {
       await axios.put(
         `${api}/api/routen/routine`,
         { blocks },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("Failed to save routine");
-      setError("Failed to load routine");
-
+      setError("Failed to save routine");
     }
-
   };
 
   const debouncedSave = useCallback(
-    // debounce((b: Block[]) => saveRoutine(b), 700),
-    debounce((b: Block[]) => { saveRoutine(b); }, 700), []
-
+    debounce((b: Block[]) => saveRoutine(b), 700),
+    []
   );
 
-  useEffect(() => { return () => { debouncedSave.cancel(); }; }, [debouncedSave]);
+  useEffect(() => {
+    return () => debouncedSave.cancel();
+  }, [debouncedSave]);
 
-  useEffect(() => { if (!loading) { debouncedSave(blocks); } }, [blocks, loading, debouncedSave]);
+  useEffect(() => {
+    if (!loading) debouncedSave(blocks);
+  }, [blocks, loading, debouncedSave]);
 
-  /* ---------------- ACTIONS ---------------- */
-  const toggleCheck = (id: number) =>
+  /* ================= STATE HELPERS ================= */
+
+  const updateBlock = (id: number, payload: Partial<Block>) => {
     setBlocks(prev =>
-      prev.map(b => (b.id === id ? { ...b, done: !b.done } : b))
+      prev.map(block =>
+        block.id === id ? { ...block, ...payload } : block
+      )
     );
+  };
 
-  const editBlock = (id: number, text: string) =>
-    setBlocks(prev =>
-      prev.map(b => (b.id === id ? { ...b, text } : b))
-    );
+  const toggleCheck = (id: number) => {
+    const block = blocks.find(b => b.id === id);
+    if (!block) return;
 
-  const addBlock = (type: BlockType) =>
-    setBlocks(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        type,
-        text: type === "heading" ? "New Section" : "New Item",
-        done: false,
-      },
-    ]);
+    updateBlock(id, { done: !block.done });
+  };
 
-  const deleteBlock = (id: number) =>
+  const editBlock = (id: number, text: string) => {
+    updateBlock(id, { text });
+  };
+
+  /* ================= ADD BLOCK ================= */
+
+  const addBlock = (type: BlockType) => {
+    setBlocks(prev => {
+      const newId = Date.now();
+
+      let sectionId = currentSectionId;
+
+      if (type === "divider") {
+        sectionId = newId;
+        setCurrentSectionId(newId);
+      }
+
+      return [
+        ...prev,
+        {
+          id: newId,
+          type,
+          text:
+            type === "heading"
+              ? "New Section"
+              : type === "check"
+              ? "New Item"
+              : type === "note"
+              ? "New Note"
+              : "",
+          done: false,
+          sectionId
+        }
+      ];
+    });
+  };
+
+  const deleteBlock = (id: number) => {
     setBlocks(prev => prev.filter(b => b.id !== id));
+  };
 
+  /* ================= DELETE ROUTINE ================= */
 
   const deleteRoutine = async () => {
     try {
@@ -105,23 +158,30 @@ const Routine: React.FC = () => {
 
       setBlocks([]);
       toast.success("Routine deleted");
-    } catch (error) {
-      console.log(error);
+    } catch {
       toast.error("Failed to delete routine");
-      setError("Failed to load routine");
-
+      setError("Failed to delete routine");
     }
-
   };
 
-  /* ---------------- UI ---------------- */
+  /* ================= GROUPING ENGINE ================= */
+
+  const groupedBlocks = blocks.reduce(
+    (acc: Record<number, Block[]>, block) => {
+      if (!acc[block.sectionId]) acc[block.sectionId] = [];
+      acc[block.sectionId].push(block);
+      return acc;
+    },
+    {}
+  );
+
+  /* ================= UI ================= */
 
   if (loading) return <Loading />;
   if (error) return <ApiError error={error} />;
 
   return (
     <div className="routine">
-      {/* Header */}
       <div className="routine__header">
         <h1>My Routine</h1>
 
@@ -130,7 +190,6 @@ const Routine: React.FC = () => {
         </Button>
       </div>
 
-      {/* Toolbar */}
       <div className="routine__toolbar">
         <button onClick={() => addBlock("heading")}>+ Heading</button>
         <button onClick={() => addBlock("check")}>+ Checklist</button>
@@ -138,79 +197,76 @@ const Routine: React.FC = () => {
         <button onClick={() => addBlock("divider")}>+ Divider</button>
       </div>
 
-      {/* Editor */}
       <div className="routine__editor">
-        {blocks.length === 0 ? (
-          <p className="routine__empty">
-            Your routine is empty. Add blocks above.
-          </p>
-        ) : (
-          blocks.map(block => {
-            if (block.type === "heading")
-              return (
-                <pre
-                  key={block.id}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="routine__heading"
-                  onBlur={e =>
-                    editBlock(block.id, e.currentTarget.innerText)
-                  }
-                >
-                  {block.text}
-                </pre>
-              );
+        {Object.values(groupedBlocks).map(section => (
+          <div key={section[0].sectionId} className="routine__section">
+            {section.map(block => {
+              if (block.type === "divider")
+                return <hr key={block.id} />;
 
-            if (block.type === "check")
-              return (
-                <div key={block.id} className="routine__check">
-                  <input
-                    type="checkbox"
-                    checked={block.done}
-                    onChange={() => toggleCheck(block.id)}
-                  />
-
-                  <span
+              if (block.type === "heading")
+                return (
+                  <pre
+                    key={block.id}
                     contentEditable
                     suppressContentEditableWarning
-                    className={block.done ? "done" : ""}
+                    className="routine__heading"
                     onBlur={e =>
                       editBlock(block.id, e.currentTarget.innerText)
                     }
                   >
                     {block.text}
-                  </span>
+                  </pre>
+                );
 
-                  <IconButton
-                    size="small"
-                    onClick={() => deleteBlock(block.id)}
+              if (block.type === "check")
+                return (
+                  <div key={block.id} className="routine__check">
+                    <input
+                      type="checkbox"
+                      checked={block.done}
+                      onChange={() => toggleCheck(block.id)}
+                    />
+
+                    <span
+                      contentEditable
+                      suppressContentEditableWarning
+                      className={block.done ? "done" : ""}
+                      onBlur={e =>
+                        editBlock(block.id, e.currentTarget.innerText)
+                      }
+                    >
+                      {block.text}
+                    </span>
+
+                    <IconButton
+                      size="small"
+                      onClick={() => deleteBlock(block.id)}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </div>
+                );
+
+              if (block.type === "note")
+                return (
+                  <p
+                    key={block.id}
+                    contentEditable
+                    suppressContentEditableWarning
+                    className="routine__note"
+                    onBlur={e =>
+                      editBlock(block.id, e.currentTarget.innerText)
+                    }
                   >
-                    <Delete fontSize="small" />
-                  </IconButton>
-                </div>
-              );
+                    {block.text}
+                  </p>
+                );
 
-            if (block.type === "note")
-              return (
-                <p
-                  key={block.id}
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="routine__note"
-                  onBlur={e =>
-                    editBlock(block.id, e.currentTarget.innerText)
-                  }
-                >
-                  {block.text}
-                </p>
-              );
-
-            if (block.type === "divider")
-              return <hr key={block.id} />;
-
-            return null;
-          })
-        )}
+              return null;
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );

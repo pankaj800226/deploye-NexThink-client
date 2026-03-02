@@ -1,0 +1,135 @@
+/* COLOR SYSTEM BASED ON #0F1214 */
+$bg-main: #0F1214;
+$bg-hover: #1A1F24;     /* Slightly lighter for hover states */
+$text-main: #FFFFFF;
+$text-dim: #737A82;     /* Muted grey for labels */
+$accent: #3B82F6;       /* Bright blue for buttons */
+$border-soft: #22272B;
+
+.notion_canvas {
+    background-color: $bg-main;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: $text-main;
+}
+
+.notion_top_gradient {
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(to bottom, #161B1F, $bg-main);
+}
+
+.notion_document {
+    width: 100%;
+    max-width: 760px; /* Optimal reading width */
+    padding: 0 24px 100px;
+    position: relative;
+
+    .notion_meta_bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+        .meta_item {
+            font-size: 0.8rem;
+            color: $text-dim;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            &:hover { background: $bg-hover; color: $text-main; }
+        }
+    }
+
+    .notion_title_input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: $text-main;
+        font-size: 2.6rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        padding: 0;
+        margin-bottom: 2rem;
+        &::placeholder { color: rgba(255, 255, 255, 0.08); }
+    }
+}
+
+.notion_property_grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .property_row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        align-items: center;
+        min-height: 34px;
+        padding: 0 8px;
+        border-radius: 4px;
+        transition: background 0.15s;
+
+        &:hover { background: $bg-hover; }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: $text-dim;
+            font-size: 0.85rem;
+            svg { font-size: 0.95rem; }
+        }
+
+        .notion_select {
+            .MuiInputBase-root {
+                color: $text-main;
+                font-size: 0.9rem;
+                padding-left: 8px;
+            }
+        }
+    }
+}
+
+.notion_editor {
+    width: 100%;
+    min-height: 450px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: lighten($text-main, 5%);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    resize: none;
+    font-family: 'Inter', sans-serif;
+    &::placeholder { color: rgba(255, 255, 255, 0.05); }
+}
+
+.notion_fixed_actions {
+    position: fixed;
+    top: 24px;
+    right: 32px;
+    z-index: 100;
+
+    .notion_primary_btn {
+        background: $accent !important;
+        color: white !important;
+        text-transform: none !important;
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        padding: 6px 14px !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        &:hover { background: lighten($accent, 5%) !important; }
+    }
+}
+
+/* MUI Popover Background Override (Crucial) */
+.MuiPaper-root {
+    background-color: $bg-hover !important;
+    color: $text-main !important;
+    border: 1px solid $border-soft;
+}

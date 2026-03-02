@@ -1,5 +1,5 @@
-import { Edit } from "@mui/icons-material";
-import { Button } from "@mui/material";
+import { Edit, CloudUpload, Email, Person, VerifiedUser } from "@mui/icons-material";
+import { Button, Avatar, Box, Typography, IconButton, Tooltip } from "@mui/material";
 import Sidebar from "../components/SideBar";
 import {
   Dialog,
@@ -9,186 +9,171 @@ import {
   Stack,
   TextField,
   useMediaQuery,
-  useTheme
+  useTheme,
+  CircularProgress
 } from '@mui/material';
 import { useEffect, useState, type ChangeEvent } from "react";
 import axios from "axios";
 import { api } from "../api/api";
 import toast from "react-hot-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import ApiError from "../components/ApiError";
 
 interface User {
-  username: string,
-  email: string,
-  avatar: string
+  username: string;
+  email: string;
+  avatar: string;
 }
 
 const Profile = () => {
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [profile, setProfile] = useState<User | null>(null)
-  const [error, setError] = useState('')
-  const [loader, setLoader] = useState(false)
-  const [file, setFile] = useState<File | null>(null)
-  const token = localStorage.getItem('TOKEN')
-  const navigate = useNavigate()
-  const [btnLoader, setBtnLoader] = useState(false)
+  const navigate = useNavigate();
+  const token = localStorage.getItem('TOKEN');
 
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [profile, setProfile] = useState<User | null>(null);
+  const [error, setError] = useState('');
+  const [loader, setLoader] = useState(false);
+  const [btnLoader, setBtnLoader] = useState(false);
+  
+  // Form & Preview State
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    file: ""
-  })
+  });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setFile(file);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile)); // Create live preview
     }
   };
-
-
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!token) {
-        toast.error("You are not login")
-        return navigate('/login')
+        toast.error("Please login to continue");
+        return navigate('/login');
       }
-
       try {
-        setLoader(true)
-
+        setLoader(true);
         const res = await axios.get(`${api}/api/user/profile`, {
           headers: { Authorization: `Bearer ${token}` }
-        })
-
-        setProfile(res.data)
-
-        setFormData({
-          username: res?.data.username,
-          email: res?.data.email,
-          file: ""
         });
-      } catch (error) {
-        console.log(error);
-        toast.error("Failed to fetch profile")
-        setError("Api Fetching Error")
+        setProfile(res.data);
+        setFormData({ username: res.data.username, email: res.data.email });
+      } catch (err) {
+        setError("Failed to load profile data");
       } finally {
-        setLoader(false)
-
+        setLoader(false);
       }
-    }
-    fetchProfile()
-  }, [token, navigate])
+    };
+    fetchProfile();
+  }, [token, navigate]);
 
-  // edit prifile
   const handleEditProfile = async () => {
-    const fd = new FormData()
-    fd.append('username', formData.username)
-    fd.append('email', formData.email)
+    const fd = new FormData();
+    fd.append('username', formData.username);
+    fd.append('email', formData.email);
+    if (file) fd.append('file', file);
 
-    if (file) fd.append('file', file)
-
-    if (!token) {
-      toast.error("You are not login")
-      return navigate('/login')
-    }
-    setBtnLoader(true)
+    setBtnLoader(true);
     try {
       const res = await axios.put(`${api}/api/user/editProfile`, fd, {
         headers: { Authorization: `Bearer ${token}` }
-      })
-
-      setProfile(res.data)
-      setEditDialogOpen(false)
-      toast.success("Profile updated")
-
-    } catch (error) {
-      console.log(error);
-      toast.error("Error updating profile")
-      setError("Api Fetching Error")
-
+      });
+      setProfile(res.data);
+      setEditDialogOpen(false);
+      setPreview(null);
+      setFile(null);
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      toast.error("Update failed. Please try again.");
     } finally {
-      setBtnLoader(false)
+      setBtnLoader(false);
     }
-  }
+  };
 
-  if (error) return <ApiError error={error} />
-  if (loader) return <Loading />
+  if (error) return <ApiError error={error} />;
+  if (loader) return <Loading />;
 
   return (
     <div className="dashboard_container">
       <Sidebar />
 
-      <main>
-        <motion.div
-          className="profile_container"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+      <main className="profile_main_wrapper">
+        <motion.div 
+          className="profile_card"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
         >
-          <motion.div
-            className="profile_left"
-            whileHover={{ scale: 1.06 }}
-            transition={{ type: "spring", stiffness: 120 }}
-          >
-            <motion.img
-              src={profile?.avatar}
-              alt="User Avatar"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            />
-          </motion.div>
-
-          <motion.div
-            className="profile_right"
-            initial={{ x: 40, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1>{profile?.username}</h1>
-            <p className="email">{profile?.email}</p>
-            <span className="role">Creator</span>
-
-            <motion.div whileHover={{ scale: 1.08 }} className="edit_btn">
-              <Button onClick={() => setEditDialogOpen(true)} startIcon={<Edit />}>
-                Edit Profile
-              </Button>
+          {/* Avatar Section */}
+          <div className="avatar_wrapper">
+            <motion.div className="avatar_ring" whileHover={{ rotate: 5 }}>
+              <img src={profile?.avatar} alt="User" />
             </motion.div>
-          </motion.div>
-        </motion.div>
+            <div className="online_indicator" />
+          </div>
 
+          {/* Info Section */}
+          <div className="profile_info">
+            <div className="badge_row">
+              <span className="role_badge">PRO WORKFLOW</span>
+              <VerifiedUser className="verified_icon" />
+            </div>
+            <h1>{profile?.username}</h1>
+            <p className="email_text">{profile?.email}</p>
+            <Button 
+              className="glass_edit_btn" 
+              onClick={() => setEditDialogOpen(true)}
+              startIcon={<Edit />}
+            >
+              Update Profile
+            </Button>
+          </div>
+        </motion.div>
       </main>
 
+      {/* Edit Dialog */}
       <Dialog
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
         fullScreen={isMobile}
         fullWidth
-        maxWidth="sm"
-        disableRestoreFocus
-        disableEnforceFocus
+        maxWidth="xs"
       >
-        <DialogTitle>Edit Profile</DialogTitle>
-        <DialogContent >
-          <Stack  spacing={2} mt={1}>
+        <DialogTitle className="dialog_title">Account Settings</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 2, alignItems: 'center' }}>
+            {/* Custom File Upload Preview */}
+            <Box className="upload_preview_container">
+               <Avatar 
+                src={preview || profile?.avatar} 
+                sx={{ width: 100, height: 100, border: '3px solid #6366f1' }} 
+               />
+               <IconButton component="label" className="upload_icon_btn">
+                 <CloudUpload />
+                 <input hidden type="file" accept="image/*" onChange={handleAvatarChange} />
+               </IconButton>
+            </Box>
+
             <TextField
               label="Username"
               name="username"
               fullWidth
               value={formData.username}
               onChange={handleChange}
-
             />
             <TextField
               label="Email"
@@ -197,37 +182,22 @@ const Profile = () => {
               value={formData.email}
               onChange={handleChange}
             />
-
-            <Button
-              fullWidth
-              component="label"
-              sx={{
-                mt: 2,
-                py: 1.2,
-                border: "1px dashed #0ff",
-                color: "#222",
-                fontWeight: "bold",
-                textTransform: "none",
-                "&:hover": {
-                  backgroundColor: "rgba(0,255,255,0.08)"
-                }
-              }}
-            >
-              {file ? file.name : "Avatar"}
-              <input hidden type="file" accept="image/*" onChange={handleAvatarChange} />
-            </Button>
-
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleEditProfile}>
-            {btnLoader ? <Loading /> : "Update"}
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setEditDialogOpen(false)} color="inherit">Cancel</Button>
+          <Button 
+            variant="contained" 
+            onClick={handleEditProfile}
+            disabled={btnLoader}
+            className="update_btn"
+          >
+            {btnLoader ? <CircularProgress size={24} color="inherit" /> : "Save Changes"}
           </Button>
         </DialogActions>
       </Dialog>
     </div>
-  )
-}
+  );
+};
 
 export default Profile;
