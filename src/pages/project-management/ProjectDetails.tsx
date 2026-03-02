@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { 
   Button, MenuItem, Dialog, DialogActions, DialogContent, 
-  DialogTitle, Stack, TextField, useMediaQuery, useTheme,
+  DialogTitle, Stack, TextField,
   Chip, Divider, Typography
 } from "@mui/material";
 import { 
@@ -32,8 +32,7 @@ interface Project {
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // States
   const [projectDetails, setProjectDetails] = useState<Project | null>(null);

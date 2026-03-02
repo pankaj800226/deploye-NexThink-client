@@ -1,5 +1,5 @@
-import { Edit, CloudUpload, Email, Person, VerifiedUser } from "@mui/icons-material";
-import { Button, Avatar, Box, Typography, IconButton, Tooltip } from "@mui/material";
+import { Edit, CloudUpload, VerifiedUser } from "@mui/icons-material";
+import { Button, Avatar, Box, IconButton } from "@mui/material";
 import Sidebar from "../components/SideBar";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import { useEffect, useState, type ChangeEvent } from "react";
 import axios from "axios";
 import { api } from "../api/api";
 import toast from "react-hot-toast";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import ApiError from "../components/ApiError";

@@ -1,0 +1,1 @@
+import{N as m}from"./index-DtoWgXwy.js";import{g as a}from"./getThemeProps-VkZSW--9.js";import{f}from"./Grow-_lnbZ0zo.js";const n=m();function c({props:s,name:t,defaultTheme:o,themeId:r}){let e=f(o);return r&&(e=e[r]||e),a({theme:e,name:t,props:s})}export{n as s,c as u};
