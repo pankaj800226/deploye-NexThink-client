@@ -120,7 +120,7 @@ const Banner = () => {
 
       <div className="container">
         <div className="left">
-          <h2>Organize Everything in One Places</h2>
+          <h2>Organize Everything in One Place</h2>
           <p>
             Write, plan, track. NextThink gives you a distraction-free workspace
             to manage tasks, notes, and projects efficiently.
