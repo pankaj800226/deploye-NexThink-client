@@ -70,8 +70,9 @@ import './styles/Task-management/todoDetails.scss'
 
 // time challanger
 import './styles/timechallange.scss'
+
 // work shedular
-import './styles/works-hedular/createShedular.scss'
+import './styles/works-shedular/createShedular.scss'
 
 
 // anzlyze

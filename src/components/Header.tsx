@@ -36,7 +36,7 @@ const Header = () => {
           <>
             <Link to="/routing" className="nav-link">Routine</Link>
             <Link to="/timechallaner" className="nav-link">FocusMood</Link>
-            <Link to="/createshedular" className="nav-link">Work Scheduler</Link>
+            <Link to="/createshedular" className="nav-link">WorkScheduler</Link>
             <Link to="/dashboard" className="nav-link">Dashboard</Link>
 
 
