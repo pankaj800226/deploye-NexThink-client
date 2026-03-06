@@ -31,16 +31,16 @@ const Feature = () => {
 
     {
       icon: <Work />,
-      title: "Work Scheduler",
+      title: "Habit Tracker",
       gradient: "linear-gradient(135deg, #b5177b, #ff7043)",
-      des: "Plan your day efficiently with a smart work scheduler that keeps your tasks and projects on track",
+      des: "Build positive habits and track your progress with our intuitive habit tracker",
     },
 
     {
       icon: <Bolt />,
-      title: "Your Routine",
+      title: "Your Planner",
       gradient: "linear-gradient(135deg, #c70cec, #e61655)",
-      des: "Create and manage your routines with ease.",
+      des: "Create and manage your planners with ease.",
     },
 
     {

@@ -28,7 +28,7 @@ const TodoEdit = React.lazy(() => import('./pages/Task-management/TodoEdit'))
 const TodoDetails = React.lazy(() => import('./pages/Task-management/TodoDetails'))
 
 {/* work shedular */ }
-const CreateShedular = React.lazy(() => import('./pages/Work-Shedular/CreateShedular'))
+const CreateHabitTracker = React.lazy(() => import('./pages/habitTracker/CreateHabitTracker'))
 
 // analyze
 const Analyze = React.lazy(() => import('./pages/Analyze/TodoAnalyze'))
@@ -44,7 +44,7 @@ const EditFeature = React.lazy(() => import('./pages/project-management/feature/
 
 
 // routing gols 
-const Routing = React.lazy(() => import('./pages/Routine/Routine'))
+const DailyPlanner = React.lazy(() => import('./pages/dailyplanner/DailyPlanner'))
 
 
 
@@ -72,7 +72,7 @@ import './styles/Task-management/todoDetails.scss'
 import './styles/timechallange.scss'
 
 // work shedular
-import './styles/works-shedular/createShedular.scss'
+import './styles/habitTracker/createHabitTracker.scss'
 
 
 // anzlyze
@@ -86,7 +86,7 @@ import './styles/project-management/allFeature.scss'
 
 
 // routing
-import './styles/routine/routine.scss'
+import './styles/dailyplanner/dailyplanner.scss'
 
 
 const AppLayout = () => {
@@ -140,8 +140,8 @@ const AppLayout = () => {
             <Route path='/todoEdit/:id' element={<TodoEdit />} />
             <Route path='/todoDetails/:id' element={<TodoDetails />} />
 
-            {/* work shedular */}
-            <Route path='/createshedular' element={<CreateShedular />} />
+            {/* habit tracker */}
+            <Route path='/habittracker' element={<CreateHabitTracker />} />
 
             {/* analyze */}
             <Route path='/analyze' element={<Analyze />} />
@@ -157,7 +157,7 @@ const AppLayout = () => {
             <Route path='/editfeature/:id' element={<EditFeature />} />
 
             {/* routing gols  */}
-            <Route path='/routing' element={<Routing />} />
+            <Route path='/dailyplanner' element={<DailyPlanner />} />
 
 
 

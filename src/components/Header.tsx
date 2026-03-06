@@ -9,7 +9,7 @@ const Header = () => {
   const [email, setEmail] = React.useState<string | null>(null);
 
   const navigate = useNavigate();
-  const location = useLocation(); 
+  const location = useLocation();
 
   React.useEffect(() => {
     setEmail(localStorage.getItem('EMAIL'));
@@ -34,9 +34,9 @@ const Header = () => {
       <nav className="nav-links desktop-nav">
         {email ? (
           <>
-            <Link to="/routing" className="nav-link">Routine</Link>
+            <Link to="/dailyplanner" className="nav-link">DailyPlanner</Link>
             <Link to="/timechallaner" className="nav-link">FocusMood</Link>
-            <Link to="/createshedular" className="nav-link">WorkScheduler</Link>
+            <Link to="/habittracker" className="nav-link">HabitTracker</Link>
             <Link to="/dashboard" className="nav-link">Dashboard</Link>
 
 
@@ -79,9 +79,9 @@ const Header = () => {
             <div className="sidebar-links">
               {email ? (
                 <>
-            <Link to="/routing" className="nav-link">Routine</Link>
+                  <Link to="/dailyplanner" className="nav-link">DailyPlanner</Link>
                   <Link to="/timechallaner" onClick={() => setSidebarOpen(false)}>FocusMood</Link>
-                  <Link to="/createshedular" onClick={() => setSidebarOpen(false)}>Work Scheduler</Link>
+                  <Link to="/habittracker" onClick={() => setSidebarOpen(false)}>HabitTracker</Link>
                   <Link to="/dashboard" onClick={() => setSidebarOpen(false)}>Dashboard</Link>
 
                   <Button
