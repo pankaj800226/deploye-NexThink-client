@@ -182,13 +182,13 @@
 
 .checkbox-custom {
   cursor: pointer;
-  border: 2px solid #10b981;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  // border: 2px solid #10b981;
+  // width: 28px;
+  // height: 28px;
+  // border-radius: 6px;
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
   // transition: background-color 0.2s, border-color 0.2s;
 
 
@@ -216,11 +216,15 @@
 
 .missed-indicator {
   position: absolute;
-  bottom: -4px;
-  width: 4px;
-  height: 4px;
+  bottom: 11px;
+  width: 14px;
+  height: 14px;
   background: var(--accent-danger);
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .current-day {

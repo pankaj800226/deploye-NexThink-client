@@ -274,6 +274,7 @@ const CreateHabitTracker = () => {
                                                                             </span>
                                                                         </label>
                                                                         {missed && !day.checked && <div className="missed-indicator" />}
+                                                                        
                                                                     </div>
                                                                 </td>
                                                             );

@@ -3,273 +3,158 @@ import debounce from "lodash/debounce";
 import axios from "axios";
 import { api } from "../../api/api";
 import toast from "react-hot-toast";
-import { Button, IconButton } from "@mui/material";
-import { Delete } from "@mui/icons-material";
 import Loading from "../../components/Loading";
 import ApiError from "../../components/ApiError";
 
-type BlockType = "heading" | "check" | "note" | "divider";
+type BlockType = "heading" | "check" | "note";
 
 interface Block {
   id: number;
   type: BlockType;
   text?: string;
   done?: boolean;
-  sectionId: number;
 }
 
-const Routine: React.FC = () => {
+const DailyPlanner: React.FC = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
   const token = localStorage.getItem("TOKEN");
 
-  const [currentSectionId, setCurrentSectionId] = useState<number>(
-    () => Date.now()
-  );
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
-  /* ================= LOAD ================= */
-
-  useEffect(() => {
-    const loadRoutine = async () => {
-      try {
-        const { data } = await axios.get(
-          `${api}/api/dailyplanner/create/planner`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const loadedBlocks = data.blocks || [];
-        setBlocks(loadedBlocks);
-
-        const lastDivider = loadedBlocks.findLast(
-          (b: Block) => b.type === "divider"
-        );
-
-        if (lastDivider) setCurrentSectionId(lastDivider.id);
-      } catch {
-        toast.error("Failed to load routine");
-        setError("Failed to load routine");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRoutine();
-  }, [token]);
-
-  /* ================= SAVE ================= */
-
-  const saveRoutine = async (blocks: Block[]) => {
+  const loadPlanner = useCallback(async () => {
     try {
-      await axios.put(
-        `${api}/api/dailyplanner/update/planner`,
-        { blocks },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-    } catch {
-      toast.error("Failed to save routine");
-      setError("Failed to save routine");
-    }
-  };
-
-  const debouncedSave = useCallback(
-    debounce((b: Block[]) => saveRoutine(b), 700),
-    []
-  );
-
-  useEffect(() => {
-    return () => debouncedSave.cancel();
-  }, [debouncedSave]);
-
-  useEffect(() => {
-    if (!loading) debouncedSave(blocks);
-  }, [blocks, loading, debouncedSave]);
-
-  /* ================= STATE HELPERS ================= */
-
-  const updateBlock = (id: number, payload: Partial<Block>) => {
-    setBlocks(prev =>
-      prev.map(block =>
-        block.id === id ? { ...block, ...payload } : block
-      )
-    );
-  };
-
-  const toggleCheck = (id: number) => {
-    const block = blocks.find(b => b.id === id);
-    if (!block) return;
-
-    updateBlock(id, { done: !block.done });
-  };
-
-  const editBlock = (id: number, text: string) => {
-    updateBlock(id, { text });
-  };
-
-  /* ================= ADD BLOCK ================= */
-
-  const addBlock = (type: BlockType) => {
-    setBlocks(prev => {
-      const newId = Date.now();
-
-      let sectionId = currentSectionId;
-
-      if (type === "divider") {
-        sectionId = newId;
-        setCurrentSectionId(newId);
-      }
-
-      return [
-        ...prev,
-        {
-          id: newId,
-          type,
-          text:
-            type === "heading"
-              ? "New Section"
-              : type === "check"
-              ? "New Item"
-              : type === "note"
-              ? "New Note"
-              : "",
-          done: false,
-          sectionId
-        }
-      ];
-    });
-  };
-
-  const deleteBlock = (id: number) => {
-    setBlocks(prev => prev.filter(b => b.id !== id));
-  };
-
-  /* ================= DELETE ROUTINE ================= */
-
-  const deleteRoutine = async () => {
-    try {
-      await axios.delete(`${api}/api/dailyplanner/delete/planner`, {
+      const { data } = await axios.get(`${api}/api/dailyplanner/create/planner`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      setBlocks(data.blocks || []);
+    } catch (err) {
+      setError("Unable to sync with server.");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
-      setBlocks([]);
-      toast.success("Routine deleted");
+  const savePlanner = async (updatedBlocks: Block[]) => {
+    try {
+      await axios.put(`${api}/api/dailyplanner/update/planner`,
+        { blocks: updatedBlocks },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     } catch {
-      toast.error("Failed to delete routine");
-      setError("Failed to delete routine");
+      toast.error("Auto-save failed");
     }
   };
 
-  /* ================= GROUPING ENGINE ================= */
+  const debouncedSave = useCallback(debounce(savePlanner, 800), []);
 
-  const groupedBlocks = blocks.reduce(
-    (acc: Record<number, Block[]>, block) => {
-      if (!acc[block.sectionId]) acc[block.sectionId] = [];
-      acc[block.sectionId].push(block);
-      return acc;
-    },
-    {}
-  );
+  useEffect(() => { loadPlanner(); }, [loadPlanner]);
+  useEffect(() => { if (!loading) debouncedSave(blocks); }, [blocks, loading, debouncedSave]);
 
-  /* ================= UI ================= */
+  const addBlock = (type: BlockType) => {
+    const newBlock: Block = {
+      id: Date.now(),
+      type,
+      text: "",
+      done: false,
+    };
+    setBlocks([...blocks, newBlock]);
+  };
+
+  const updateText = (id: number, text: string) => {
+    setBlocks(prev => prev.map(b => b.id === id ? { ...b, text } : b));
+  };
+
+  const toggleTodo = (id: number) => {
+    setBlocks(prev => prev.map(b => b.id === id ? { ...b, done: !b.done } : b));
+  };
 
   if (loading) return <Loading />;
   if (error) return <ApiError error={error} />;
 
   return (
-    <div className="routine">
-      <div className="routine__header">
-        <h1>My Planner</h1>
+    <div className="planner-page">
+      <div className="planner-cover" />
+      <div className="planner-container">
+        <header className="planner-header">
+          <div className="title-row">
+            <h1>📋 Daily Planner</h1>
+            <button className="delete-all-btn" onClick={() => setBlocks([])}>Clear All</button>
+          </div>
+          <div className="meta-row">
+            <span>{today}</span>
+            <span>•</span>
+            <span style={{ color: "#00a2ff" }}>
+              {blocks.filter(b => b.type === "check" && b.done).length} / {blocks.filter(b => b.type === "check").length} tasks
+            </span>
+          </div>
+        </header>
 
-        <Button color="error" variant="outlined" onClick={deleteRoutine}>
-          Delete Planner
-        </Button>
-      </div>
+        <nav className="notion-toolbar">
+          <span className="add-label">Quick Add</span>
+          <button className="picker-btn" onClick={() => addBlock("heading")}><span>H</span> Heading</button>
+          <button className="picker-btn" onClick={() => addBlock("check")}><span>☑</span> To-do</button>
+          <button className="picker-btn" onClick={() => addBlock("note")}><span>¶</span> Text</button>
+        </nav>
 
-      <div className="routine__toolbar">
-        <button onClick={() => addBlock("heading")}>+ Heading</button>
-        <button onClick={() => addBlock("check")}>+ Checklist</button>
-        <button onClick={() => addBlock("note")}>+ Note</button>
-        <button onClick={() => addBlock("divider")}>+ Divider</button>
-      </div>
+       {/* // Inside your DailyPlanner component map function: */}
+        <main className="planner-editor">
+          {blocks.map((block) => (
+            <div key={block.id} className="block-row-group">
+              <div className="side-controls">
+                {/* <button className="control-btn drag-handle">⠿</button> */}
+                <button
+                  className="control-btn delete-btn"
+                  onClick={() => setBlocks(blocks.filter(b => b.id !== block.id))}
+                >
+                  <span className="icon">✕</span>
+                </button>
+              </div>
 
-      <div className="routine__editor">
-        {Object.values(groupedBlocks).map(section => (
-          <div key={section[0].sectionId} className="routine__section">
-            {section.map(block => {
-              if (block.type === "divider")
-                return <hr key={block.id} />;
-
-              if (block.type === "heading")
-                return (
-                  <pre
-                    key={block.id}
+              <div className="block-content">
+                {block.type === "heading" ? (
+                  <div
                     contentEditable
                     suppressContentEditableWarning
-                    className="routine__heading"
-                    onBlur={e =>
-                      editBlock(block.id, e.currentTarget.innerText)
-                    }
-                  >
-                    {block.text}
-                  </pre>
-                );
-
-              if (block.type === "check")
-                return (
-                  <div key={block.id} className="routine__check">
-                    <input
-                      type="checkbox"
-                      checked={block.done}
-                      onChange={() => toggleCheck(block.id)}
-                    />
-
-                    <span
+                    className="heading-block"
+                    data-placeholder="Heading 1"
+                    onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
+                  >{block.text}</div>
+                ) : block.type === "check" ? (
+                  <div className="todo-item">
+                    <label className="checkbox-container">
+                      <input type="checkbox" checked={block.done} onChange={() => toggleTodo(block.id)} />
+                      <span className="checkmark"></span>
+                    </label>
+                    <div
                       contentEditable
                       suppressContentEditableWarning
-                      className={block.done ? "done" : ""}
-                      onBlur={e =>
-                        editBlock(block.id, e.currentTarget.innerText)
-                      }
-                    >
-                      {block.text}
-                    </span>
-
-                    <IconButton
-                      size="small"
-                      onClick={() => deleteBlock(block.id)}
-                    >
-                      <Delete fontSize="small" />
-                    </IconButton>
+                      className={`todo-text ${block.done ? 'done' : ''}`}
+                      data-placeholder="To-do"
+                      onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
+                    >{block.text}</div>
                   </div>
-                );
-
-              if (block.type === "note")
-                return (
-                  <p
-                    key={block.id}
+                ) : (
+                  <div
                     contentEditable
                     suppressContentEditableWarning
-                    className="routine__note"
-                    onBlur={e =>
-                      editBlock(block.id, e.currentTarget.innerText)
-                    }
-                  >
-                    {block.text}
-                  </p>
-                );
-
-              return null;
-            })}
-          </div>
-        ))}
+                    className="note-block"
+                    data-placeholder="Type '/' for commands..."
+                    onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
+                  >{block.text}</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </main>
       </div>
     </div>
   );
 };
 
-export default Routine;
+export default DailyPlanner;
