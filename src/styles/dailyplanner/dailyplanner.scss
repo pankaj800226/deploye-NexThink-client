@@ -28,11 +28,34 @@ serif;
 $ease : 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
 // ─── Reset ────────────────────────────────────────────────────
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+// ... (Add this inside .planner-header .title-row)
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
+
+.download-btn {
+  background: $accent;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: opacity $ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    background: $text-m;
+    cursor: not-allowed;
+  }
+}
+
 
 [contenteditable]:focus {
   outline: none;

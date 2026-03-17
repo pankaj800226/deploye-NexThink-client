@@ -1,0 +1,280 @@
+$bg: #0F1214;
+$surface: #161B1E;
+$border: #24292E;
+$accent: #6366f1;
+$text: #FFFFFF;
+$dim: #94A3B8;
+
+.saas-container {
+  background: $bg;
+  min-height: 100vh;
+  color: $dim;
+  padding: 1rem;
+  overflow-x: hidden;
+
+  @media (min-width: 768px) {
+    padding: 3rem;
+  }
+
+  .dashboard-main {
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    @media (min-width: 640px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      color: $text;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      margin: 0;
+      font-weight: 800;
+    }
+
+    .total-badge {
+      background: $surface;
+      border: 1px solid $border;
+      padding: 6px 15px;
+      border-radius: 50px;
+      color: $accent;
+      font-weight: bold;
+      font-size: 0.8rem;
+      align-self: flex-start;
+    }
+  }
+
+  .grid-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+
+    @media (min-width: 1024px) {
+      grid-template-columns: 1fr 380px;
+      align-items: start;
+    }
+  }
+
+  .card {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 16px;
+    padding: 1.25rem;
+
+    @media (min-width: 768px) {
+      padding: 1.5rem;
+    }
+  }
+
+  .chart-card {
+    margin-bottom: 2rem;
+
+    h3 {
+      color: $text;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .chart-box {
+      height: 200px;
+
+      @media (min-width: 768px) {
+        height: 280px;
+      }
+    }
+  }
+
+  .timer-card {
+    text-align: center;
+
+    @media (min-width: 1024px) {
+      &.sticky {
+        position: sticky;
+        top: 2rem;
+      }
+    }
+
+    .status-dot {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: $accent;
+      margin-bottom: 1rem;
+
+      &.pulse {
+        animation: blink 1.5s infinite;
+      }
+    }
+
+    .timer-val {
+      font-size: clamp(3.5rem, 15vw, 5rem);
+      font-weight: 900;
+      color: $text;
+      margin: 0.5rem 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bar-track {
+      height: 6px;
+      background: $border;
+      border-radius: 10px;
+      margin: 2rem 0;
+      overflow: hidden;
+
+      .bar-fill {
+        height: 100%;
+        background: $accent;
+        box-shadow: 0 0 10px $accent;
+      }
+    }
+
+    .form-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+
+      input {
+        background: $bg;
+        border: 1px solid $border;
+        padding: 12px;
+        border-radius: 8px;
+        color: white;
+        width: 100%;
+      }
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+
+      .btn-full {
+        grid-column: span 2;
+      }
+
+      button {
+        padding: 14px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        border: none;
+
+        &.btn-p {
+          background: $accent;
+          color: white;
+        }
+
+        &.btn-s {
+          background: #2D3339;
+          color: white;
+        }
+
+        &.btn-o {
+          background: transparent;
+          border: 1px solid $border;
+          color: $dim;
+        }
+      }
+    }
+  }
+}
+
+.timer-list-wrapper {
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      font-size: 1.2rem;
+      color: white;
+    }
+  }
+
+  .logs-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .log-card {
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: 0.2s;
+
+    &:hover {
+      border-color: rgba($accent, 0.4);
+      transform: translateX(5px);
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+
+      h3 {
+        color: white;
+        font-size: 1rem;
+      }
+
+      .delete-btn {
+        background: none;
+        border: none;
+        color: $dim;
+
+        &:hover {
+          color: #ef4444;
+        }
+      }
+    }
+
+    .log-stats-row {
+      display: flex;
+      gap: 1.5rem;
+      margin: 0.8rem 0;
+      font-size: 0.85rem;
+
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    .mini-progress-track {
+      height: 4px;
+      background: $bg;
+      border-radius: 10px;
+
+      .mini-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, $accent, #a855f7);
+        border-radius: 10px;
+      }
+    }
+  }
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}

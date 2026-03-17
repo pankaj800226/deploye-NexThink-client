@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import debounce from "lodash/debounce";
 import axios from "axios";
 import { api } from "../../api/api";
 import toast from "react-hot-toast";
 import Loading from "../../components/Loading";
 import ApiError from "../../components/ApiError";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 type BlockType = "heading" | "check" | "note";
 
@@ -19,6 +21,8 @@ const DailyPlanner: React.FC = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
+  const plannerRef = useRef<HTMLDivElement>(null);
   const token = localStorage.getItem("TOKEN");
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -57,12 +61,7 @@ const DailyPlanner: React.FC = () => {
   useEffect(() => { if (!loading) debouncedSave(blocks); }, [blocks, loading, debouncedSave]);
 
   const addBlock = (type: BlockType) => {
-    const newBlock: Block = {
-      id: Date.now(),
-      type,
-      text: "",
-      done: false,
-    };
+    const newBlock: Block = { id: Date.now(), type, text: "", done: false };
     setBlocks([...blocks, newBlock]);
   };
 
@@ -74,17 +73,50 @@ const DailyPlanner: React.FC = () => {
     setBlocks(prev => prev.map(b => b.id === id ? { ...b, done: !b.done } : b));
   };
 
+  const downloadPDF = async () => {
+    if (!plannerRef.current) return;
+    setIsExporting(true);
+    const toastId = toast.loading("Preparing PDF...");
+
+    try {
+      const canvas = await html2canvas(plannerRef.current, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        backgroundColor: "#0F1214", // Matches $bg-base
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Planner-${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success("Downloaded successfully!", { id: toastId });
+    } catch (error) {
+      toast.error("Failed to generate PDF", { id: toastId });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (loading) return <Loading />;
   if (error) return <ApiError error={error} />;
 
   return (
     <div className="planner-page">
       <div className="planner-cover" />
-      <div className="planner-container">
+      <div className="planner-container" ref={plannerRef}>
         <header className="planner-header">
           <div className="title-row">
             <h1>📋 Daily Planner</h1>
-            <button className="delete-all-btn" onClick={() => setBlocks([])}>Clear All</button>
+            <div className="header-actions">
+              <button className="download-btn" onClick={downloadPDF} disabled={isExporting}>
+                {isExporting ? "Exporting..." : "Download PDF"}
+              </button>
+              <button className="delete-all-btn" onClick={() => setBlocks([])}>Clear All</button>
+            </div>
           </div>
           <div className="meta-row">
             <span>{today}</span>
@@ -95,23 +127,19 @@ const DailyPlanner: React.FC = () => {
           </div>
         </header>
 
-        <nav className="notion-toolbar">
+        <nav className="notion-toolbar" data-html2canvas-ignore>
           <span className="add-label">Quick Add</span>
           <button className="picker-btn" onClick={() => addBlock("heading")}><span>H</span> Heading</button>
           <button className="picker-btn" onClick={() => addBlock("check")}><span>☑</span> To-do</button>
           <button className="picker-btn" onClick={() => addBlock("note")}><span>¶</span> Text</button>
         </nav>
 
-       {/* // Inside your DailyPlanner component map function: */}
         <main className="planner-editor">
+          {blocks.length === 0 && <p className="empty-hint">Start by adding a block above...</p>}
           {blocks.map((block) => (
             <div key={block.id} className="block-row-group">
-              <div className="side-controls">
-                {/* <button className="control-btn drag-handle">⠿</button> */}
-                <button
-                  className="control-btn delete-btn"
-                  onClick={() => setBlocks(blocks.filter(b => b.id !== block.id))}
-                >
+              <div className="side-controls" data-html2canvas-ignore>
+                <button className="control-btn delete-btn" onClick={() => setBlocks(blocks.filter(b => b.id !== block.id))}>
                   <span className="icon">✕</span>
                 </button>
               </div>
@@ -144,7 +172,7 @@ const DailyPlanner: React.FC = () => {
                     contentEditable
                     suppressContentEditableWarning
                     className="note-block"
-                    data-placeholder="Type '/' for commands..."
+                    data-placeholder="Type something..."
                     onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
                   >{block.text}</div>
                 )}

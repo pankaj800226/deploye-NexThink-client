@@ -14,7 +14,7 @@ const Login = React.lazy(() => import('./components/auth/Login'))
 const ForgetPassword = React.lazy(() => import('./components/auth/ForgetPassword'))
 const OtpVerify = React.lazy(() => import('./components/auth/OtpVerify'))
 const UpdatePassword = React.lazy(() => import('./components/auth/UpdatePassword'))
-const TimerChallanger = React.lazy(() => import('./pages/TimerChallanger'))
+const TimerChallanger = React.lazy(() => import('./pages/timerPomodoro/TimerChallanger'))
 
 
 
@@ -69,7 +69,7 @@ import './styles/Task-management/todoDetails.scss'
 
 
 // time challanger
-import './styles/timechallange.scss'
+import './styles/timer/timechallange.scss'
 
 // work shedular
 import './styles/habitTracker/createHabitTracker.scss'
