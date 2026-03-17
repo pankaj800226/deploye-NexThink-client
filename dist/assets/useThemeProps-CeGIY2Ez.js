@@ -1,1 +1,0 @@
-import{N as m}from"./index-CEFFAKW_.js";import{g as a}from"./getThemeProps-BPUTwOaF.js";import{f}from"./Grow-hnb0mJw9.js";const n=m();function c({props:s,name:t,defaultTheme:o,themeId:r}){let e=f(o);return r&&(e=e[r]||e),a({theme:e,name:t,props:s})}export{n as s,c as u};

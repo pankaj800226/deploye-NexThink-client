@@ -26,7 +26,7 @@ const TimerList: React.FC<Props> = ({ timers, handleDelete }) => {
       ) : (
         <div className="logs-stack">
           {timers.slice().reverse().map((timer, i) => (
-            <motion.div 
+            <motion.div
               key={timer._id}
               initial={{ opacity: 0, x: -15 }}
               animate={{ opacity: 1, x: 0 }}
@@ -37,15 +37,15 @@ const TimerList: React.FC<Props> = ({ timers, handleDelete }) => {
                 <div className="log-main-info">
                   <div className="title-row">
                     <h3>{timer.routineTitle || "Untitled Session"}</h3>
-                    <button 
-                      onClick={() => handleDelete(timer._id)} 
+                    <button
+                      onClick={() => handleDelete(timer._id)}
                       className="delete-btn"
                       title="Delete log"
                     >
                       <Trash2 size={16} />
                     </button>
                   </div>
-                  
+
                   <div className="log-stats-row">
                     <div className="stat-item">
                       <Clock size={14} className="icon-blue" />
@@ -60,10 +60,10 @@ const TimerList: React.FC<Props> = ({ timers, handleDelete }) => {
 
                 {/* Minimalist Progress Bar */}
                 <div className="mini-progress-track">
-                  <div 
-                    className="mini-progress-fill" 
-                    style={{ 
-                      width: `${Math.min((timer.secondsSpent / (timer.min * 60)) * 100, 100)}%` 
+                  <div
+                    className="mini-progress-fill"
+                    style={{
+                      width: `${Math.min((timer.secondsSpent / (timer.min * 60)) * 100, 100)}%`
                     }}
                   />
                 </div>

@@ -16,6 +16,7 @@ import axios from "axios";
 import { api } from "../../api/api";
 import toast from "react-hot-toast";
 import TimerList from "./TimerList";
+import sound from "../../assets/alarm.mp3"; // ✅ FIXED IMPORT
 
 export interface ITimer {
   _id: string;
@@ -35,7 +36,8 @@ const TimerChallanger: React.FC = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [totalTime, setTotalTime] = useState<number>(0);
   const [timers, setTimers] = useState<any[]>([]);
-
+  const [btnLoader, setBtnLoader] = useState<boolean>(false);
+  
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const token = localStorage.getItem("TOKEN");
 
@@ -50,19 +52,29 @@ const TimerChallanger: React.FC = () => {
 
   useEffect(() => { fetchTimers(); }, []);
 
+  // ⏱ TIMER LOGIC
   useEffect(() => {
     let interval: any;
+
     if (isRunning && timer > 0) {
       interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0 && isRunning) {
       setIsRunning(false);
-      audioRef.current?.play();
+
+      // 🔊 RESET + PLAY SOUND
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+      }
+
       toast.success("Focus session complete!");
     }
+
     return () => clearInterval(interval);
   }, [isRunning, timer]);
 
-  // Chart Logic
+  // 📊 CHART
   const chartData = useMemo(() => {
     const lastData = timers.slice(-7);
     return {
@@ -77,27 +89,66 @@ const TimerChallanger: React.FC = () => {
     };
   }, [timers]);
 
+  // ▶ START
   const handleStart = () => {
     if (min <= 0) return toast.error("Please set minutes");
+
+    // 🔊 STOP OLD SOUND
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
     setTimer(min * 60);
     setTotalTime(min * 60);
     setIsRunning(true);
   };
 
+  // 💾 SAVE
   const handleSaveInfo = async () => {
     const secondsSpent = totalTime - timer;
-    if (!routineTitle.trim() || secondsSpent < 3) return toast.error("Invalid session");
+
+    if (!routineTitle.trim() || secondsSpent < 3) {
+      return toast.error("Invalid session");
+    }
+
+    setBtnLoader(true);
     try {
       await axios.post(`${api}/api/timer/saveTimer`,
-        { routineTitle, min, spentMin: Math.floor(secondsSpent / 60), spentSec: secondsSpent % 60, secondsSpent },
+        {
+          routineTitle,
+          min,
+          spentMin: Math.floor(secondsSpent / 60),
+          spentSec: secondsSpent % 60,
+          secondsSpent
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Challange Saved!");
+
+      // 🔊 STOP + RESET SOUND AFTER SAVE
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
+      toast.success("Challenge Saved!");
       fetchTimers();
-      setTimer(0); setRoutineTitle("");
-    } catch { toast.error("Error saving"); }
+
+      // 🔄 RESET STATE
+      setTimer(0);
+      setRoutineTitle("");
+      setMin(0);
+      setTotalTime(0);
+      setIsRunning(false);
+
+    } catch {
+      toast.error("Error saving");
+    } finally {
+      setBtnLoader(false);
+    }
   };
 
+  // 🗑 DELETE
   const handleDelete = async (id: string) => {
     try {
       await axios.delete(`${api}/api/timer/deleteTimer/${id}`, {
@@ -109,7 +160,7 @@ const TimerChallanger: React.FC = () => {
       console.log(err);
       toast.error("Error deleting log");
     }
-  }
+  };
 
   return (
     <div className="saas-container">
@@ -128,7 +179,11 @@ const TimerChallanger: React.FC = () => {
             <div className="chart-box">
               <Line
                 data={chartData}
-                options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { display: false } }
+                }}
               />
             </div>
           </div>
@@ -137,44 +192,72 @@ const TimerChallanger: React.FC = () => {
 
         <aside className="right-panel">
           <div className="card timer-card sticky">
+
             <div className={`status-dot ${isRunning ? 'pulse' : ''}`}>
               {isRunning ? 'FOCUS ACTIVE' : 'READY TO CHALLENGE'}
             </div>
 
             <AnimatePresence mode="wait">
               {!isRunning && timer === 0 ? (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="form-inputs">
-                  <input type="text" placeholder="Task Name" value={routineTitle} onChange={(e) => setRoutineTitle(e.target.value)} />
-                  <input type="number" placeholder="Minutes" onChange={(e) => setMin(Number(e.target.value))} />
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="form-inputs"
+                >
+                  <input
+                    type="text"
+                    placeholder="Task Name"
+                    value={routineTitle}
+                    onChange={(e) => setRoutineTitle(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Minutes"
+                    value={min}
+                    onChange={(e) => setMin(Number(e.target.value))}
+                  />
                 </motion.div>
               ) : (
-                <h2 className="current-task">{routineTitle || "Deep Work"}</h2>
+                <h2 className="current-task">
+                  {routineTitle || "Deep Work"}
+                </h2>
               )}
             </AnimatePresence>
 
             <div className="timer-val">
-              {String(Math.floor(timer / 60)).padStart(2, '0')}:{String(timer % 60).padStart(2, '0')}
+              {String(Math.floor(timer / 60)).padStart(2, '0')}:
+              {String(timer % 60).padStart(2, '0')}
             </div>
 
             <div className="bar-track">
               <motion.div
                 className="bar-fill"
-                animate={{ width: `${totalTime > 0 ? ((totalTime - timer) / totalTime) * 100 : 0}%` }}
+                animate={{
+                  width: `${totalTime > 0 ? ((totalTime - timer) / totalTime) * 100 : 0}%`
+                }}
               />
             </div>
 
             <div className="btn-group">
               {!isRunning ? (
-                <button className="btn-p btn-full" onClick={handleStart}>Start Challenge</button>
+                <button className="btn-p btn-full" onClick={handleStart}>
+                  Start Challenge
+                </button>
               ) : (
-                <button className="btn-s" onClick={() => setIsRunning(false)}>Pause</button>
+                <button className="btn-s" onClick={() => setIsRunning(false)}>
+                  Pause
+                </button>
               )}
-              <button className="btn-o" onClick={handleSaveInfo}>Finish & Save</button>
+              <button className="btn-o" onClick={handleSaveInfo}>
+                {btnLoader ? "Saving..." : "Save Session"}
+              </button>
             </div>
           </div>
         </aside>
       </div>
-      <audio ref={audioRef} src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" />
+
+      {/* 🔊 AUDIO */}
+      <audio ref={audioRef} src={sound} preload="auto" />
     </div>
   );
 };
