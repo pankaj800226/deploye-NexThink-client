@@ -27,8 +27,17 @@ const Register = () => {
     const navigate = useNavigate()
 
     const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
+        const selectedFile = e.target.files?.[0];
+        const MAX_FILE_SIZE = 900 * 1024; // 921,600 bytes
+
+        if (selectedFile) {
+            if (selectedFile.size > MAX_FILE_SIZE) {
+                toast("File is too large! Please select a file smaller than 900KB.")
+                e.target.value = "";
+                return;
+            }
+
+            setFile(selectedFile);
         }
     };
 
