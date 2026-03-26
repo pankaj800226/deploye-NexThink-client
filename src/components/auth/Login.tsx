@@ -6,10 +6,14 @@ import {
   InputAdornment,
   Paper,
   TextField,
-  Typography
+  Typography,
+  IconButton,
+  Fade
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -19,162 +23,180 @@ import { api } from "../../api/api";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [btnLoader, setBtnLoader] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [btnLoader, setBtnLoader] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
-
     if (email && password) {
-      setBtnLoader(true)
+      setBtnLoader(true);
       try {
-        const res = await axios.post(`${api}/api/user/login`, { email, password })
+        const res = await axios.post(`${api}/api/user/login`, { email, password });
 
         if (res.data.code === 404) {
-          toast("User Not Found")
+          toast.error("User Not Found");
         } else if (res.data.code === 405) {
-          toast("Password Invilid")
+          toast.error("Invalid Password");
         } else if (res.data.code === 200) {
-          window.localStorage.setItem('USERNAME', res.data.username)
-          window.localStorage.setItem('EMAIL', res.data.email)
-          window.localStorage.setItem('USERID', res.data.userId)
-          window.localStorage.setItem('TOKEN', res.data.token)
-          window.localStorage.setItem('AVATAR', res.data.avatar)
-          navigate('/')
+          toast.success("Welcome back!");
+          window.localStorage.setItem('USERNAME', res.data.username);
+          window.localStorage.setItem('EMAIL', res.data.email);
+          window.localStorage.setItem('USERID', res.data.userId);
+          window.localStorage.setItem('TOKEN', res.data.token);
+          window.localStorage.setItem('AVATAR', res.data.avatar);
+          navigate('/');
         }
       } catch (error) {
-        console.log(error);
-        toast.error("Error")
-
+        toast.error("Server Error");
       } finally {
-        setBtnLoader(false)
+        setBtnLoader(false);
       }
-
     } else {
-      toast.error("All Field are required")
+      toast.error("All fields are required");
     }
+  };
 
-  }
   return (
-    <Box
-      sx={{
-        minHeight: "95vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}
-    >
+    <Box sx={containerStyle}>
       <Container maxWidth="xs">
-        <Paper
-          elevation={10}
-          sx={{
-            p: 4,
-            background: "#111",
-            borderRadius: "14px",
-            boxShadow: "0 0 25px rgba(0,255,255,0.15)"
-          }}
-        >
-          <Typography
-            variant="h4"
-            textAlign="center"
-            mb={3}
-            sx={{ color: "#0ff", fontWeight: "bold" }}
-          >
-            Login
-          </Typography>
+        <Fade in timeout={800}>
+          <Paper elevation={0} sx={glassPaperStyle}>
+            <Typography variant="h4" sx={titleStyle}>
+              USER LOGIN
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#888", textAlign: 'center', mb: 4 }}>
+              Enter your credentials to access the system
+            </Typography>
 
+            <TextField
+              fullWidth
+              placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              sx={inputFieldStyle}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon sx={iconStyle} />
+                  </InputAdornment>
+                )
+              }}
+            />
 
-          <TextField
-            fullWidth
-            placeholder="Email Address"
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <EmailIcon sx={{ color: "#0ff" }} />
-                </InputAdornment>
-              )
-            }}
-            sx={inputStyle}
-          />
+            <TextField
+              fullWidth
+              placeholder="Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              sx={inputFieldStyle}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon sx={iconStyle} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      sx={{ color: "#555" }}
+                    >
+                      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
 
-          <TextField
-            fullWidth
-            placeholder="Password"
-            type="password"
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon sx={{ color: "#0ff" }} />
-                </InputAdornment>
-              )
-            }}
-            sx={inputStyle}
-          />
+            <Box sx={{ textAlign: 'right', mb: 2 }}>
+                <Link to='/forgetpassword' style={{ textDecoration: 'none' }}>
+                    <Typography sx={{ color: "#0ff", fontSize: '12px', "&:hover": { textDecoration: 'underline' } }}>
+                        Forgot Password?
+                    </Typography>
+                </Link>
+            </Box>
 
-          <Button
-            fullWidth
-            onClick={handleLogin}
-            sx={{
-              mt: 3,
-              py: 1.3,
-              background: "linear-gradient(45deg, #00f2ff, #00ff9d)",
-              color: "#000",
-              fontWeight: "bold",
-              "&:hover": {
-                background: "linear-gradient(45deg, #00ff9d, #00f2ff)"
-              }
-            }}
-          >
-            {btnLoader ? <CircularProgress size={20} /> : "Login"}
-          </Button>
+            <Button
+              fullWidth
+              disabled={btnLoader}
+              onClick={handleLogin}
+              sx={mainBtnStyle}
+            >
+              {btnLoader ? <CircularProgress size={24} sx={{ color: '#000' }} /> : "ACCESS ACCOUNT"}
+            </Button>
 
-          <Typography
-            mt={2}
-            textAlign="center"
-            fontSize="14px"
-            sx={{ color: "#aaa" }}
-          >
-            Already have an account?{" "}
-            <Link to={'/register'}>
-              <span style={{ color: "#0ff", cursor: "pointer" }}>Register</span>
-            </Link>
-          </Typography>
-
-          <Typography
-            mt={2}
-            textAlign="center"
-            fontSize="14px"
-            sx={{ color: "#aaa" }}
-          >
-            Forget Password?{" "}
-            <Link to={'/forgetpassword'}>
-              <span style={{ color: "#0ff", cursor: "pointer" }}>Forget Password</span>
-            </Link>
-          </Typography>
-        </Paper>
+            <Typography mt={4} textAlign="center" fontSize="14px" sx={{ color: "#aaa" }}>
+              New to the platform?{" "}
+              <Link to="/register" style={{ textDecoration: 'none' }}>
+                <Box component="span" sx={{ color: "#0ff", fontWeight: 'bold', "&:hover": { textDecoration: 'underline' } }}>
+                  CREATE ACCOUNT
+                </Box>
+              </Link>
+            </Typography>
+          </Paper>
+        </Fade>
       </Container>
     </Box>
   );
 };
 
-const inputStyle = {
-  input: { color: "#fff" },
-  borderRadius: "8px",
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#333"
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#0ff"
-  },
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#00ffea"
+// --- Styles (Identical to Register for consistency) ---
+
+const containerStyle = {
+  minHeight: "100vh",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "radial-gradient(circle at center, #1a1a1a 0%, #000 100%)",
+};
+
+const glassPaperStyle = {
+  p: 4,
+  background: "rgba(20, 20, 20, 0.8)",
+  backdropFilter: "blur(12px)",
+  borderRadius: "20px",
+  border: "1px solid rgba(0, 255, 255, 0.1)",
+  boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.8)",
+};
+
+const titleStyle = {
+  color: "#0ff",
+  fontWeight: 900,
+  letterSpacing: '2px',
+  textAlign: 'center',
+  textShadow: "0 0 10px rgba(0,255,255,0.5)"
+};
+
+const inputFieldStyle = {
+  mb: 2,
+  "& .MuiOutlinedInput-root": {
+    color: "#fff",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    "& fieldset": { borderColor: "#333", borderRadius: "12px" },
+    "&:hover fieldset": { borderColor: "#0ff" },
+    "&.Mui-focused fieldset": { borderColor: "#0ff" },
   }
+};
+
+const iconStyle = { color: "#0ff", fontSize: '20px' };
+
+const mainBtnStyle = {
+  mt: 1,
+  py: 1.5,
+  background: "linear-gradient(90deg, #00f2ff, #00ff9d)",
+  color: "#000",
+  fontWeight: "800",
+  borderRadius: "12px",
+  transition: "0.3s",
+  boxShadow: "0 4px 15px rgba(0, 255, 255, 0.3)",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 20px rgba(0, 255, 255, 0.5)",
+    background: "linear-gradient(90deg, #00ff9d, #00f2ff)",
+  },
+  "&:disabled": { background: "#444" }
 };
 
 export default Login;
