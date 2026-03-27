@@ -6,11 +6,11 @@ import {
     CircularProgress,
     Divider,
 } from "@mui/material";
-import { 
-    InsertEmoticon, 
-    PushPin, 
-    SignalCellularAlt, 
-    Layers, 
+import {
+    InsertEmoticon,
+    PushPin,
+    SignalCellularAlt,
+    Layers,
     AutoAwesome
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
@@ -24,9 +24,9 @@ import ApiError from "../../components/ApiError";
 // Animation Variants
 const containerVars = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
         opacity: 1,
-        transition: { duration: 0.6, staggerChildren: 0.1 } 
+        transition: { duration: 0.6, staggerChildren: 0.1 }
     }
 };
 
@@ -54,7 +54,7 @@ const CreateTodo = () => {
     };
 
     const handleCreateTodo = async () => {
-        if (!formData.title) return toast.error("Please add a title");
+        if (!formData.title || !formData.category || !formData.priority || !formData.description || !formData.status) return toast.error("Please add all field");
         try {
             setBtnLoader(true);
             await axios.post(`${api}/api/todo/createTodo`, formData, {
@@ -77,7 +77,7 @@ const CreateTodo = () => {
             <main className="notion_canvas">
                 <div className="notion_top_gradient" />
 
-                <motion.div 
+                <motion.div
                     className="notion_document"
                     variants={containerVars}
                     initial="hidden"
@@ -113,19 +113,19 @@ const CreateTodo = () => {
                             { label: "Priority", icon: <SignalCellularAlt />, name: "priority", options: ["Low", "Medium", "High"] },
                             { label: "Category", icon: <Layers />, name: "category", options: ["Work", "Personal", "Study", "Other"] }
                         ].map((prop, idx) => (
-                            <motion.div 
-                                key={idx} 
+                            <motion.div
+                                key={idx}
                                 className="property_row"
                                 whileHover={{ backgroundColor: "#1A1F24" }}
                             >
                                 <label>{prop.icon} {prop.label}</label>
-                                <TextField 
-                                    select 
-                                    name={prop.name} 
-                                    value={(formData as any)[prop.name]} 
-                                    onChange={handleChange} 
-                                    variant="standard" 
-                                    InputProps={{ disableUnderline: true }} 
+                                <TextField
+                                    select
+                                    name={prop.name}
+                                    value={(formData as any)[prop.name]}
+                                    onChange={handleChange}
+                                    variant="standard"
+                                    InputProps={{ disableUnderline: true }}
                                     className="notion_select"
                                 >
                                     {prop.options.map(opt => (
@@ -152,7 +152,7 @@ const CreateTodo = () => {
                     </motion.div>
 
                     {/* Floating Button Motion */}
-                    <motion.div 
+                    <motion.div
                         className="notion_fixed_actions"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
