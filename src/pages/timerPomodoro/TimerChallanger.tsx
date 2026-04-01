@@ -13,6 +13,8 @@ import {
   Play, Pause, RotateCcw, Save, Trash2, Target,
   Zap, TrendingUp, TrendingDown, ListChecks, Flame, Minus
 } from "lucide-react";
+import ApiError from "../../components/ApiError";
+import Loading from "../../components/Loading";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler);
 
@@ -555,6 +557,8 @@ const TimerChallanger: React.FC = () => {
   const [timers, setTimers] = useState<ITimer[]>([]);
   const [btnLoader, setBtnLoader] = useState<boolean>(false);
   const [audioError, setAudioError] = useState<boolean>(false);
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const token = localStorage.getItem("TOKEN");
@@ -562,12 +566,14 @@ const TimerChallanger: React.FC = () => {
   /* ── FIX: Audio play with error handling ── */
   const playSound = useCallback(async () => {
     if (audioRef.current && !audioError) {
+      setLoading(true);
       try {
         await audioRef.current.play();
       } catch (err) {
         console.log("Audio playback failed:", err);
         setAudioError(true);
         toast.success("🎉 Focus session complete!", { duration: 5000 });
+        setError("Something went wrong")
       }
     } else {
       toast.success("🎉 Focus session complete!", { duration: 5000 });
@@ -597,6 +603,10 @@ const TimerChallanger: React.FC = () => {
     } catch (err) {
       console.error('Failed to fetch timers:', err);
       toast.error("Failed to load sessions");
+      setError("Something went wrong")
+
+    } finally {
+      setLoading(false)
     }
   }, [token]);
 
@@ -667,6 +677,8 @@ const TimerChallanger: React.FC = () => {
       toast.success("Session deleted");
     } catch {
       toast.error("Delete failed");
+      setError("Something went wrong")
+
     }
   }, [token, fetchTimers]);
 
@@ -713,6 +725,7 @@ const TimerChallanger: React.FC = () => {
       resetAll();
     } catch {
       toast.error("Save error");
+      setError("Something went wrong")
     } finally {
       setBtnLoader(false);
     }
@@ -848,6 +861,9 @@ const TimerChallanger: React.FC = () => {
 
   const statusLabel = isRunning ? "focusing" : timeLeft > 0 ? "paused" : "ready";
   const statusClass = isRunning ? "active" : timeLeft > 0 ? "paused" : "";
+
+  if (error) return <ApiError error={error} />
+  if (loading) return <Loading />
 
   return (
     <div className="fc">
@@ -1106,7 +1122,7 @@ const TimerChallanger: React.FC = () => {
             </AnimatePresence>
           </div>
         </div>
-              
+
       </div>
       <audio ref={audioRef} src={sound} />
     </div>
