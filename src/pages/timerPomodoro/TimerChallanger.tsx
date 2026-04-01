@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Line } from "react-chartjs-2";
 import {
@@ -52,7 +52,13 @@ const PRESETS: { label: string; val: number }[] = [
 const DAILY_GOAL_MIN = 60;
 
 /* ─── HELPERS ────────────────────────────────────────────────────────────── */
-const getDayKey = (date: Date): string => date.toISOString().slice(0, 10);
+// FIX 1: Local date function to avoid timezone issues
+const getLocalDayKey = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 const getLast15Days = (): DayEntry[] => {
   const days: DayEntry[] = [];
@@ -60,7 +66,7 @@ const getLast15Days = (): DayEntry[] => {
   for (let i = 14; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const key = getDayKey(d);
+    const key = getLocalDayKey(d);
     const label = i === 0
       ? "Today"
       : d.toLocaleDateString("en", { weekday: "short" }).slice(0, 2) + d.getDate();
@@ -79,8 +85,7 @@ const getBarKind = (min: number): BarKind => {
 const getStatColor = (val: number, good: number, mid: number): StatColor =>
   val >= good ? "green" : val >= mid ? "yellow" : "red";
 
-
-/* ─── CSS ────────────────────────────────────────────────────────────────── */
+/* ─── CSS (Same as before, no changes) ──────────────────────────────────── */
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
@@ -118,7 +123,6 @@ const css = `
   background: var(--bg);
 }
 
-/* ── NAV ─────────────────────────────────── */
 .fc-nav {
   display: flex;
   align-items: center;
@@ -160,7 +164,6 @@ const css = `
   border-radius: 99px;
 }
 
-/* ── PAGE GRID ───────────────────────────── */
 .fc-page {
   flex: 1;
   display: grid;
@@ -177,7 +180,6 @@ const css = `
   align-items: start;
 }
 
-/* ── CARD ────────────────────────────────── */
 .fc-card {
   background: var(--s1);
   border: 1px solid var(--border);
@@ -198,7 +200,6 @@ const css = `
 }
 .fc-card-hd svg { color: var(--accent); flex-shrink: 0; }
 
-/* ── TIMER CARD ──────────────────────────── */
 .fc-timer-card {
   grid-area: timer;
   position: sticky;
@@ -254,7 +255,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 .fc-pset:disabled { opacity: 0.3; cursor: not-allowed; }
 .fc-divider { height: 1px; background: var(--border); margin: 14px 0; }
 
-/* ring */
 .fc-ring-wrap { display: flex; justify-content: center; padding: 6px 0 18px; }
 .fc-ring { position: relative; width: 170px; height: 170px; }
 .fc-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -287,7 +287,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 .fc-status.active { color: var(--accent); }
 .fc-status.paused { color: var(--warn); }
 
-/* buttons */
 .fc-actions { display: grid; gap: 7px; }
 .fc-row2 { grid-template-columns: 1fr 1fr; }
 .fc-btn {
@@ -320,7 +319,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 }
 .fc-btn-save:hover:not(:disabled) { background: rgba(var(--accentRgb), 0.16); }
 
-/* ── CHART ───────────────────────────────── */
 .fc-chart-card { grid-area: chart; }
 .fc-chart-wrap { height: 190px; }
 .fc-chart-empty {
@@ -329,7 +327,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   gap: 10px; color: var(--sub); font-size: 13px;
 }
 
-/* ── LOGS ────────────────────────────────── */
 .fc-logs-card { grid-area: logs; }
 .fc-log-list {
   display: flex; flex-direction: column; gap: 7px;
@@ -370,9 +367,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   text-align: center; color: var(--sub); font-size: 13px; padding: 36px 0;
 }
 
-/* ══════════════════════════════════════════
-   15-DAY PROGRESS
-══════════════════════════════════════════ */
 .fc-progress-card { grid-area: progress; }
 
 .fc-progress-top {
@@ -413,7 +407,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 .fc-verdict.neutral { background: rgba(var(--goldRgb),0.08);   color: var(--gold);   border: 1px solid rgba(var(--goldRgb),0.2); }
 .fc-verdict.bad     { background: rgba(var(--warnRgb),0.08);   color: var(--warn);   border: 1px solid rgba(var(--warnRgb),0.2); }
 
-/* bar grid */
 .fc-days-grid {
   display: grid;
   grid-template-columns: repeat(15, 1fr);
@@ -442,7 +435,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   border: 1px solid var(--border);
   cursor: default;
 }
-/* goal dashed line via pseudo */
 .fc-day-bar-track::before {
   content: '';
   position: absolute;
@@ -470,7 +462,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 }
 .fc-day-label.today { color: var(--accent); font-weight: 700; }
 
-/* legend */
 .fc-bar-legend {
   display: flex; align-items: center; gap: 14px;
   margin-top: 10px; flex-wrap: wrap;
@@ -495,7 +486,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   background: repeating-linear-gradient(90deg, rgba(var(--accentRgb),.6) 0 3px, transparent 3px 6px);
 }
 
-/* stats grid — now 4 columns */
 .fc-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -527,7 +517,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 .fc-stat-val.red    { color: var(--warn); }
 .fc-stat-sub { font-size: 9px; color: var(--sub); }
 
-/* ── RESPONSIVE ──────────────────────────── */
 @media (max-width: 900px) {
   .fc-page {
     grid-template-columns: 1fr;
@@ -556,7 +545,7 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 }
 `;
 
-/* ─── COMPONENT ──────────────────────────────────────────────────────────── */
+/* ─── MAIN COMPONENT ─────────────────────────────────────────────────────── */
 const TimerChallanger: React.FC = () => {
   const [routineTitle, setRoutineTitle] = useState<string>("");
   const [customMin, setCustomMin] = useState<number | "">("");
@@ -565,93 +554,184 @@ const TimerChallanger: React.FC = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [timers, setTimers] = useState<ITimer[]>([]);
   const [btnLoader, setBtnLoader] = useState<boolean>(false);
+  const [audioError, setAudioError] = useState<boolean>(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const token = localStorage.getItem("TOKEN");
 
-  /* ── fetch ── */
-  const fetchTimers = async (): Promise<void> => {
+  /* ── FIX: Audio play with error handling ── */
+  const playSound = useCallback(async () => {
+    if (audioRef.current && !audioError) {
+      try {
+        await audioRef.current.play();
+      } catch (err) {
+        console.log("Audio playback failed:", err);
+        setAudioError(true);
+        toast.success("🎉 Focus session complete!", { duration: 5000 });
+      }
+    } else {
+      toast.success("🎉 Focus session complete!", { duration: 5000 });
+    }
+  }, [audioError]);
+
+  /* ── fetch timers ── */
+  const fetchTimers = useCallback(async (): Promise<void> => {
+    if (!token) {
+      toast.error("Please login again");
+      return;
+    }
     try {
       const res = await axios.get<ITimer[]>(`${api}/api/timer/getTimers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTimers(res.data);
-    } catch (err) { console.error(err); }
-  };
-  useEffect(() => { fetchTimers(); }, []);
+      // FIX: Validate timer data
+      const validTimers = res.data.filter(t => {
+        const mins = t.spentMin ?? 0;
+        const isValid = mins >= 0 && mins <= 1440; // Max 24 hours
+        if (!isValid) {
+          console.warn("Invalid timer found:", t);
+        }
+        return isValid;
+      });
+      setTimers(validTimers);
+    } catch (err) {
+      console.error('Failed to fetch timers:', err);
+      toast.error("Failed to load sessions");
+    }
+  }, [token]);
 
-  /* ── countdown engine ── */
   useEffect(() => {
-    let id: ReturnType<typeof setInterval>;
+    fetchTimers();
+  }, [fetchTimers]);
+
+  /* ── FIX: Timer countdown engine with proper cleanup ── */
+  useEffect(() => {
+    let id: ReturnType<typeof setInterval> | undefined;
+
     if (isRunning && timeLeft > 0) {
-      id = setInterval(() => setTimeLeft(p => p - 1), 1000);
+      id = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } else if (timeLeft === 0 && isRunning) {
       setIsRunning(false);
-      audioRef.current?.play();
-      toast.success("🎉 Focus session complete!");
+      playSound();
     }
-    return () => clearInterval(id);
-  }, [isRunning, timeLeft]);
+
+    return () => {
+      if (id) clearInterval(id);
+    };
+  }, [isRunning, timeLeft, playSound]);
 
   /* ── handlers ── */
-  const startSession = (mins: number): void => {
+  const startSession = useCallback((mins: number): void => {
+    if (isRunning) {
+      toast.error("Current session finish karo pehle");
+      return;
+    }
     const secs = mins * 60;
     setCustomMin(mins);
     setTimeLeft(secs);
     setTotalInitialSeconds(secs);
     setIsRunning(true);
-  };
+  }, [isRunning]);
 
-  const handleStart = (): void => {
-    if (timeLeft > 0) { setIsRunning(true); return; }
-    if (!customMin || Number(customMin) <= 0) { toast.error("Set minutes first"); return; }
+  const handleStart = useCallback((): void => {
+    if (isRunning) return;
+
+    if (timeLeft > 0) {
+      setIsRunning(true);
+      return;
+    }
+
+    if (!customMin || Number(customMin) <= 0) {
+      toast.error("Set minutes first");
+      return;
+    }
+
     startSession(Number(customMin));
-  };
-// delete data
-  const handleDelete = async (id: string): Promise<void> => {
+  }, [isRunning, timeLeft, customMin, startSession]);
+
+  const handleDelete = useCallback(async (id: string): Promise<void> => {
+    if (!token) return;
     try {
       await axios.delete(`${api}/api/timer/deleteTimer/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchTimers();
-    } catch { toast.error("Delete failed"); }
-  };
+      toast.success("Session deleted");
+    } catch {
+      toast.error("Delete failed");
+    }
+  }, [token, fetchTimers]);
 
-  // save session in db
-  const handleSave = async (): Promise<void> => {
+  // FIX: Save session with validation
+  const handleSave = useCallback(async (): Promise<void> => {
     const spent = totalInitialSeconds - timeLeft;
-    if (!routineTitle.trim() || spent < 5) { toast.error("Session too short or missing title"); return; }
+
+    if (!routineTitle.trim()) {
+      toast.error("Please enter a session title");
+      return;
+    }
+
+    if (routineTitle.length > 50) {
+      toast.error("Title too long (max 50 chars)");
+      return;
+    }
+
+    if (spent < 5) {
+      toast.error("Session must be at least 5 seconds");
+      return;
+    }
+
+    const spentMin = Math.floor(spent / 60);
+    const spentSec = spent % 60;
+
+    // FIX: Validate minutes
+    if (spentMin > 1440) {
+      toast.error("Invalid session duration");
+      return;
+    }
+
     setBtnLoader(true);
     try {
       await axios.post(`${api}/api/timer/saveTimer`, {
         routineTitle,
         min: Math.floor(totalInitialSeconds / 60),
-        spentMin: Math.floor(spent / 60),
-        spentSec: spent % 60,
+        spentMin,
+        spentSec,
         secondsSpent: spent,
       }, { headers: { Authorization: `Bearer ${token}` } });
-      audioRef.current?.pause();
+
       toast.success("Saved to dashboard!");
       fetchTimers();
       resetAll();
-    } catch { toast.error("Save error"); }
-    finally { setBtnLoader(false); }
-  };
+    } catch {
+      toast.error("Save error");
+    } finally {
+      setBtnLoader(false);
+    }
+  }, [routineTitle, totalInitialSeconds, timeLeft, token, fetchTimers]);
 
-  const resetAll = (): void => {
+  const resetAll = useCallback((): void => {
     setIsRunning(false);
     setTimeLeft(0);
     setTotalInitialSeconds(0);
     setCustomMin("");
     setRoutineTitle("");
-  };
+  }, []);
 
-  const fmt = (s: number): string => {
+  const fmt = useCallback((s: number): string => {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
     return `${h > 0 ? h + ":" : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-  };
+  }, []);
 
   /* ── SVG ring ── */
   const RADIUS = 78;
@@ -660,8 +740,8 @@ const TimerChallanger: React.FC = () => {
     ? CIRC * (1 - timeLeft / totalInitialSeconds)
     : CIRC;
 
-  /* ── Chart ── */
-  const chartData = {
+  /* ── Chart Data ── */
+  const chartData = useMemo(() => ({
     labels: timers.slice(-8).map(t => t.routineTitle.substring(0, 7)),
     datasets: [{
       data: timers.slice(-8).map(t => t.spentMin),
@@ -674,8 +754,9 @@ const TimerChallanger: React.FC = () => {
       pointBorderColor: "#07090f",
       pointBorderWidth: 2,
     }],
-  };
-  const chartOpts = {
+  }), [timers]);
+
+  const chartOpts = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
@@ -683,51 +764,87 @@ const TimerChallanger: React.FC = () => {
       x: { grid: { color: "#1a1f2e" }, ticks: { color: "#5a6280", font: { family: "Space Mono", size: 10 } } },
       y: { grid: { color: "#1a1f2e" }, ticks: { color: "#5a6280", font: { family: "Space Mono", size: 10 } } },
     },
-  };
+  }), []);
 
   /* ══════════════════════════════════════
-     15-DAY PROGRESS DATA
+     FIX: 15-DAY PROGRESS DATA WITH LOCAL DATES
   ══════════════════════════════════════ */
   const days15 = useMemo<DayEntry[]>(() => getLast15Days(), []);
 
+  // FIX: Use local date for daily map
   const dailyMap = useMemo<Record<string, number>>(() => {
     const map: Record<string, number> = {};
+
     timers.forEach(t => {
-      const raw = t.createdAt ?? null;
-      const key = raw ? getDayKey(new Date(raw)) : getDayKey(new Date());
-      map[key] = (map[key] ?? 0) + (t.spentMin ?? 0);
+      if (!t.createdAt) return;
+
+      // Use local date to avoid timezone issues
+      const date = new Date(t.createdAt);
+      const key = getLocalDayKey(date);
+      const mins = t.spentMin ?? 0;
+
+      // FIX: Only add valid minutes
+      if (mins > 0 && mins <= 1440) {
+        map[key] = (map[key] ?? 0) + mins;
+      }
     });
+
     return map;
   }, [timers]);
 
+  // FIX: Calculate max day minutes from last 15 days only
   const maxDayMin = useMemo<number>(() => {
     const vals = days15.map(d => dailyMap[d.key] ?? 0);
-    return Math.max(...vals, DAILY_GOAL_MIN, 1);
+    const maxVal = Math.max(...vals, DAILY_GOAL_MIN, 1);
+    return maxVal;
   }, [days15, dailyMap]);
 
-  /* goal line % from bottom  */
-  const goalPct = Math.round((DAILY_GOAL_MIN / maxDayMin) * 100);
+  const goalPct = useMemo(() => {
+    return Math.min(Math.round((DAILY_GOAL_MIN / maxDayMin) * 100), 100);
+  }, [maxDayMin]);
 
-  /* stats */
-  const goodDays = days15.filter(d => (dailyMap[d.key] ?? 0) >= DAILY_GOAL_MIN).length;
-  const badDays = days15.filter(d => { const m = dailyMap[d.key] ?? 0; return m > 0 && m < DAILY_GOAL_MIN; }).length;
-  const emptyDays = days15.filter(d => !(dailyMap[d.key])).length;
-  const totalMin15 = days15.reduce((a, d) => a + (dailyMap[d.key] ?? 0), 0);
-  const avgMin = Math.round(totalMin15 / 15);
+  // FIX: Stats calculation using only last 15 days
+  const stats = useMemo(() => {
+    let goodDays = 0;
+    let badDays = 0;
+    let emptyDays = 0;
+    let totalMin15 = 0;
 
-  /* streak */
-  let streak = 0;
-  for (let i = days15.length - 1; i >= 0; i--) {
-    if ((dailyMap[days15[i].key] ?? 0) >= DAILY_GOAL_MIN) streak++;
-    else break;
-  }
+    days15.forEach(day => {
+      const mins = dailyMap[day.key] ?? 0;
+      totalMin15 += mins;
 
-  /* verdict */
-  const goodRatio = goodDays / 15;
-  const verdict: VerdictKind =
-    goodRatio >= 0.6 ? "good" : goodRatio >= 0.3 ? "neutral" : "bad";
-  const verdictText =
-    verdict === "good" ? "🔥 On Fire" : verdict === "neutral" ? "〜 Average" : "📉 Needs Work";
+      if (mins >= DAILY_GOAL_MIN) goodDays++;
+      else if (mins > 0 && mins < DAILY_GOAL_MIN) badDays++;
+      else if (mins === 0) emptyDays++;
+    });
+
+    const avgMin = Math.round(totalMin15 / 15);
+
+    // Calculate streak
+    let streak = 0;
+    for (let i = days15.length - 1; i >= 0; i--) {
+      const mins = dailyMap[days15[i].key] ?? 0;
+      if (mins >= DAILY_GOAL_MIN) streak++;
+      else break;
+    }
+
+    // Verdict
+    const goodRatio = goodDays / 15;
+    const verdict: VerdictKind = goodRatio >= 0.6 ? "good" : goodRatio >= 0.3 ? "neutral" : "bad";
+    const verdictText = verdict === "good" ? "🔥 On Fire" : verdict === "neutral" ? "〜 Average" : "📉 Needs Work";
+
+    return {
+      goodDays,
+      badDays,
+      emptyDays,
+      totalMin15,
+      avgMin,
+      streak,
+      verdict,
+      verdictText
+    };
+  }, [days15, dailyMap]);
 
   const statusLabel = isRunning ? "focusing" : timeLeft > 0 ? "paused" : "ready";
   const statusClass = isRunning ? "active" : timeLeft > 0 ? "paused" : "";
@@ -736,10 +853,23 @@ const TimerChallanger: React.FC = () => {
     <div className="fc">
       <style>{css}</style>
 
+      {/* Navbar */}
+      <div className="fc-nav">
+        <div className="fc-logo">
+          <div className="fc-logo-icon">
+            <Zap size={18} />
+          </div>
+          <span>FocusChallanger</span>
+        </div>
+        <div className="fc-nav-right">
+          <div className="fc-badge">⚡ focus mode</div>
+        </div>
+      </div>
+
       <div className="fc-page">
 
         {/* ════════════════════════════════
-            15-DAY PROGRESS
+            15-DAY PROGRESS (FIXED)
         ════════════════════════════════ */}
         <div className="fc-card fc-progress-card">
 
@@ -748,14 +878,14 @@ const TimerChallanger: React.FC = () => {
               <Flame size={13} /> 15-Day Progress
             </div>
             <div className="fc-progress-badges">
-              <div className={`fc-streak ${streak >= 3 ? "" : "cold"}`}>
-                <Flame size={12} /> {streak}d streak
+              <div className={`fc-streak ${stats.streak >= 3 ? "" : "cold"}`}>
+                <Flame size={12} /> {stats.streak}d streak
               </div>
-              <div className={`fc-verdict ${verdict}`}>
-                {verdict === "good" && <TrendingUp size={11} />}
-                {verdict === "neutral" && <Minus size={11} />}
-                {verdict === "bad" && <TrendingDown size={11} />}
-                {verdictText}
+              <div className={`fc-verdict ${stats.verdict}`}>
+                {stats.verdict === "good" && <TrendingUp size={11} />}
+                {stats.verdict === "neutral" && <Minus size={11} />}
+                {stats.verdict === "bad" && <TrendingDown size={11} />}
+                {stats.verdictText}
               </div>
             </div>
           </div>
@@ -763,7 +893,7 @@ const TimerChallanger: React.FC = () => {
           {/* BAR GRID */}
           <div
             className="fc-days-grid"
-            style={{ "--goal-pct": goalPct } as React.CSSProperties}
+            style={{ '--goal-pct': goalPct } as React.CSSProperties}
           >
             {days15.map((day, i) => {
               const min = dailyMap[day.key] ?? 0;
@@ -806,45 +936,43 @@ const TimerChallanger: React.FC = () => {
             <div className="fc-legend-goal"><div className="fc-legend-dash" /> Goal line</div>
           </div>
 
-          {/* ── STATS — 4 boxes including badDays ── */}
+          {/* ── STATS (FIXED) ── */}
           <div className="fc-stats-grid">
-
             <div className="fc-stat-box">
               <div className="fc-stat-label">Good Days</div>
-              <div className={`fc-stat-val ${getStatColor(goodDays, 10, 5)}`}>
-                {goodDays}<sup>/15</sup>
+              <div className={`fc-stat-val ${getStatColor(stats.goodDays, 10, 5)}`}>
+                {stats.goodDays}<sup>/15</sup>
               </div>
               <div className="fc-stat-sub">≥{DAILY_GOAL_MIN} min/day</div>
             </div>
 
             <div className="fc-stat-box">
-              <div className="fc-stat-label">Bad Days</div>
-              <div className={`fc-stat-val ${getStatColor(15 - badDays, 12, 8)}`}>
-                {badDays}<sup>/15</sup>
+              <div className="fc-stat-label">Partial Days</div>
+              <div className={`fc-stat-val ${getStatColor(15 - stats.badDays - stats.emptyDays, 8, 4)}`}>
+                {stats.badDays}<sup>/15</sup>
               </div>
               <div className="fc-stat-sub">&lt;{DAILY_GOAL_MIN}m, &gt;0m</div>
             </div>
 
             <div className="fc-stat-box">
               <div className="fc-stat-label">Avg / Day</div>
-              <div className={`fc-stat-val ${getStatColor(avgMin, DAILY_GOAL_MIN, 30)}`}>
-                {avgMin}<sup>m</sup>
+              <div className={`fc-stat-val ${getStatColor(stats.avgMin, DAILY_GOAL_MIN, 30)}`}>
+                {stats.avgMin}<sup>m</sup>
               </div>
               <div className="fc-stat-sub">last 15 days</div>
             </div>
 
             <div className="fc-stat-box">
               <div className="fc-stat-label">Missed Days</div>
-              <div className={`fc-stat-val ${getStatColor(15 - emptyDays, 12, 8)}`}>
-                {emptyDays}<sup>/15</sup>
+              <div className={`fc-stat-val ${getStatColor(15 - stats.emptyDays, 12, 8)}`}>
+                {stats.emptyDays}<sup>/15</sup>
               </div>
               <div className="fc-stat-sub">zero sessions</div>
             </div>
-
           </div>
         </div>
 
-        {/* ── TIMER CONTROL ── */}
+        {/* ── TIMER CONTROL (Same) ── */}
         <div className="fc-card fc-timer-card">
           <div className="fc-card-hd"><Zap size={13} /> Timer Control</div>
 
@@ -931,7 +1059,7 @@ const TimerChallanger: React.FC = () => {
           )}
         </div>
 
-        {/* ── CHART ── */}
+        {/* ── CHART (Same) ── */}
         <div className="fc-card fc-chart-card">
           <div className="fc-card-hd"><TrendingUp size={13} /> Weekly Output (minutes)</div>
           <div className="fc-chart-wrap">
@@ -946,7 +1074,7 @@ const TimerChallanger: React.FC = () => {
           </div>
         </div>
 
-        {/* ── LOGS ── */}
+        {/* ── LOGS (Same) ── */}
         <div className="fc-card fc-logs-card">
           <div className="fc-card-hd"><ListChecks size={13} /> Session Logs : {timers.length}</div>
           <div className="fc-log-list">
@@ -978,7 +1106,7 @@ const TimerChallanger: React.FC = () => {
             </AnimatePresence>
           </div>
         </div>
-
+              
       </div>
       <audio ref={audioRef} src={sound} />
     </div>
