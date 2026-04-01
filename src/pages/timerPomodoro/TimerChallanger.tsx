@@ -854,7 +854,7 @@ const TimerChallanger: React.FC = () => {
       <style>{css}</style>
 
       {/* Navbar */}
-      <div className="fc-nav">
+      {/* <div className="fc-nav">
         <div className="fc-logo">
           <div className="fc-logo-icon">
             <Zap size={18} />
@@ -864,7 +864,7 @@ const TimerChallanger: React.FC = () => {
         <div className="fc-nav-right">
           <div className="fc-badge">⚡ focus mode</div>
         </div>
-      </div>
+      </div> */}
 
       <div className="fc-page">
 
