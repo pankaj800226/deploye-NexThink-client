@@ -120,6 +120,7 @@ const AppLayout = () => {
         <CommandPalette />
 
         <Routes>
+          <Route path='/' element={<Home />} />
           <Route path='/register' element={<Register />} />
           <Route path='/login' element={<Login />} />
           <Route path='/forgetpassword' element={<ForgetPassword />} />
@@ -128,7 +129,7 @@ const AppLayout = () => {
 
 
           <Route element={<SaveRoute />}>
-            <Route path='/' element={<Home />} />
+
             <Route path='/timechallaner' element={<TimerChallanger />} />
 
             {/*In dashboard all page will be here */}
