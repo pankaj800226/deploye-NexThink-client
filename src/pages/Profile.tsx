@@ -1,5 +1,5 @@
-import { Edit, CloudUpload, VerifiedUser, Email, Person, CalendarToday, TrendingUp, Logout } from "@mui/icons-material";
-import { Button, Avatar, Box, IconButton, Chip, Divider, Badge } from "@mui/material";
+import { Edit, CloudUpload, Email, CalendarToday,Logout, VerifiedUser } from "@mui/icons-material";
+import { Button, Avatar, Box, IconButton } from "@mui/material";
 import {
   Dialog,
   DialogActions,
@@ -10,7 +10,6 @@ import {
   useMediaQuery,
   useTheme,
   CircularProgress,
-  LinearProgress
 } from '@mui/material';
 import { useEffect, useState, type ChangeEvent } from "react";
 import axios from "axios";
