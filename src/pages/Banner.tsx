@@ -6,7 +6,14 @@ import { api } from "../api/api";
 import toast from "react-hot-toast";
 import ApiError from "../components/ApiError";
 import Loading from "../components/Loading";
-import img from "../assets/Gemini_Generated_Image_yslo0fyslo0fyslo.png";
+import one from "../assets/one.png";
+import two from "../assets/two.png";
+import three from "../assets/three.png";
+import four from "../assets/four.png";
+import five from "../assets/five.png";
+
+
+
 
 /* ─── All animations are pure CSS — zero JS overhead ─── */
 const GlobalStyles = () => (
@@ -215,17 +222,19 @@ const GlobalStyles = () => (
 
 /* ═══════════════════════════════ Banner ═══════════════════════════════════ */
 const Banner = () => {
-  const [allUser, setAllUser]           = useState<any[]>([]);
-  const [error, setError]               = useState("");
-  const [loader, setLoader]             = useState(false);
+  const [allUser, setAllUser] = useState<any[]>([]);
+  const [error, setError] = useState("");
+  const [loader, setLoader] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused]         = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const carouselData = [
-    { id: 1, image: img, title: "Task Management",    description: "Organize your daily tasks with ease" },
-    { id: 2, image: img, title: "Team Collaboration", description: "Work together seamlessly" },
-    { id: 3, image: img, title: "Smart Notes",        description: "Capture ideas instantly" },
-    { id: 4, image: img, title: "Project Tracking",   description: "Monitor progress in real-time" },
+    { id: 1, image: one, title: "Banner one", },
+    { id: 2, image: two, title: "Feature" },
+    { id: 3, image: three, title: "Daily Planner" },
+    { id: 4, image: four, title: "Habbit Tracker" },
+    { id: 5, image: five, title: "Focus Mode" },
+
   ];
 
   const nextSlide = useCallback(
@@ -258,7 +267,7 @@ const Banner = () => {
     })();
   }, []);
 
-  if (error)  return <ApiError error={error} />;
+  if (error) return <ApiError error={error} />;
   if (loader) return <Loading />;
 
   return (
@@ -278,35 +287,35 @@ const Banner = () => {
       >
         {/* ── Static soft blobs (no JS animation) ── */}
         <div style={{
-          position:"absolute", top:"-140px", left:"-140px",
-          width:"500px", height:"500px", borderRadius:"50%",
-          background:"radial-gradient(circle, rgba(79,70,229,.08) 0%, transparent 70%)",
-          pointerEvents:"none",
-        }}/>
+          position: "absolute", top: "-140px", left: "-140px",
+          width: "500px", height: "500px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(79,70,229,.08) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
         <div style={{
-          position:"absolute", bottom:"-100px", right:"-100px",
-          width:"400px", height:"400px", borderRadius:"50%",
-          background:"radial-gradient(circle, rgba(124,58,237,.06) 0%, transparent 70%)",
-          pointerEvents:"none",
-        }}/>
+          position: "absolute", bottom: "-100px", right: "-100px",
+          width: "400px", height: "400px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(124,58,237,.06) 0%, transparent 70%)",
+          pointerEvents: "none",
+        }} />
 
         {/* ── Content ── */}
         <div
           className="banner-inner"
           style={{
-            width:"100%",
-            maxWidth:"860px",
-            margin:"0 auto",
-            padding:"110px 40px 80px",
-            textAlign:"center",
-            position:"relative",
-            zIndex:1,
+            width: "100%",
+            maxWidth: "860px",
+            margin: "0 auto",
+            padding: "110px 40px 80px",
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {/* Badge */}
-          <div className="anim-badge" style={{ display:"flex", justifyContent:"center", marginBottom:"22px" }}>
+          <div className="anim-badge" style={{ display: "flex", justifyContent: "center", marginBottom: "22px" }}>
             <span className="badge-pill">
-              <span className="live-dot"/>
+              <span className="live-dot" />
               Now in Public Beta — Free Forever
             </span>
           </div>
@@ -315,12 +324,12 @@ const Banner = () => {
           <h1
             className="anim-title"
             style={{
-              fontSize:"clamp(32px, 5.5vw, 64px)",
-              fontWeight:800,
-              lineHeight:1.15,
-              letterSpacing:"-0.03em",
-              color:"#111827",
-              marginBottom:"20px",
+              fontSize: "clamp(32px, 5.5vw, 64px)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              letterSpacing: "-0.03em",
+              color: "#111827",
+              marginBottom: "20px",
             }}
           >
             Organize everything{" "}
@@ -331,16 +340,16 @@ const Banner = () => {
           <p
             className="anim-sub"
             style={{
-              fontSize:"clamp(15px, 2vw, 18px)",
-              color:"#6b7280",
-              lineHeight:1.75,
-              maxWidth:"520px",
-              margin:"0 auto 32px",
-              fontWeight:400,
+              fontSize: "clamp(15px, 2vw, 18px)",
+              color: "#6b7280",
+              lineHeight: 1.75,
+              maxWidth: "520px",
+              margin: "0 auto 32px",
+              fontWeight: 400,
             }}
           >
             Write, plan, and track — all in one distraction-free workspace.{" "}
-            <strong style={{ color:"#111827", fontWeight:600 }}>NextThink</strong>{" "}
+            <strong style={{ color: "#111827", fontWeight: 600 }}>NextThink</strong>{" "}
             keeps your tasks, notes, and projects in perfect order.
           </p>
 
@@ -348,34 +357,34 @@ const Banner = () => {
           <div
             className="anim-avs"
             style={{
-              display:"flex", alignItems:"center", justifyContent:"center",
-              gap:"12px", marginBottom:"32px", flexWrap:"wrap",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: "12px", marginBottom: "32px", flexWrap: "wrap",
             }}
           >
             {/* Stacked avatars */}
-            <div style={{ display:"flex", alignItems:"center" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
               {allUser.slice(0, 7).map((user, index) => (
                 <div
                   key={user._id || index}
                   className="av-img"
                   style={{
-                    width:"38px", height:"38px", borderRadius:"50%",
-                    backgroundImage:`url(${user?.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"})`,
-                    backgroundSize:"cover", backgroundPosition:"center",
+                    width: "38px", height: "38px", borderRadius: "50%",
+                    backgroundImage: `url(${user?.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"})`,
+                    backgroundSize: "cover", backgroundPosition: "center",
                     marginLeft: index !== 0 ? "-10px" : "0",
-                    position:"relative", zIndex: 8 - index,
+                    position: "relative", zIndex: 8 - index,
                   }}
                 />
               ))}
               {allUser.length > 4 && (
                 <div style={{
-                  width:"38px", height:"38px", borderRadius:"50%",
-                  background:"#f3f4f6",
-                  border:"2.5px solid #fff",
-                  boxShadow:"0 2px 6px rgba(0,0,0,.08)",
-                  display:"flex", alignItems:"center", justifyContent:"center",
-                  fontSize:"11px", fontWeight:700, color:"#4f46e5",
-                  marginLeft:"-10px",
+                  width: "38px", height: "38px", borderRadius: "50%",
+                  background: "#f3f4f6",
+                  border: "2.5px solid #fff",
+                  boxShadow: "0 2px 6px rgba(0,0,0,.08)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "11px", fontWeight: 700, color: "#4f46e5",
+                  marginLeft: "-10px",
                 }}>
                   +{allUser.length - 4}
                 </div>
@@ -383,15 +392,15 @@ const Banner = () => {
             </div>
 
             {/* Stars + text */}
-            <div style={{ textAlign:"left" }}>
-              <div style={{ display:"flex", gap:"2px", marginBottom:"2px" }}>
-                {[...Array(5)].map((_,i) => (
-                  <span key={i} style={{ color:"#f59e0b", fontSize:"13px" }}>★</span>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ display: "flex", gap: "2px", marginBottom: "2px" }}>
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} style={{ color: "#f59e0b", fontSize: "13px" }}>★</span>
                 ))}
               </div>
-              <span style={{ fontSize:"13px", color:"#9ca3af" }}>
+              <span style={{ fontSize: "13px", color: "#9ca3af" }}>
                 Trusted by{" "}
-                <strong style={{ color:"#374151" }}>{allUser.length}+ users</strong>
+                <strong style={{ color: "#374151" }}>{allUser.length}+ users</strong>
               </span>
             </div>
           </div>
@@ -400,17 +409,17 @@ const Banner = () => {
           <div
             className="anim-cta cta-row"
             style={{
-              display:"flex", gap:"12px", justifyContent:"center",
-              marginBottom:"64px", flexWrap:"wrap",
+              display: "flex", gap: "12px", justifyContent: "center",
+              marginBottom: "64px", flexWrap: "wrap",
             }}
           >
-            <Link to="/dashboard" style={{ textDecoration:"none" }}>
+            <Link to="/dashboard" style={{ textDecoration: "none" }}>
               <button className="cta-btn">
                 Get Started Free
-                <ArrowRightAlt style={{ fontSize:20 }} />
+                <ArrowRightAlt style={{ fontSize: 20 }} />
               </button>
             </Link>
-            <Link to="/about" style={{ textDecoration:"none" }}>
+            <Link to="/about" style={{ textDecoration: "none" }}>
               <button className="cta-outline">See how it works</button>
             </Link>
           </div>
@@ -423,79 +432,77 @@ const Banner = () => {
           >
             {/* Top row */}
             <div style={{
-              display:"flex", alignItems:"center", justifyContent:"space-between",
-              marginBottom:"14px", paddingInline:"2px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              marginBottom: "14px", paddingInline: "2px",
             }}>
-              <div style={{ textAlign:"left" }}>
-                <span style={{ fontSize:"11px", color:"#9ca3af", textTransform:"uppercase", letterSpacing:".07em" }}>
+              <div style={{ textAlign: "left" }}>
+                <span style={{ fontSize: "11px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".07em" }}>
                   Feature preview
                 </span>
-                <p style={{ margin:0, fontSize:"14px", fontWeight:600, color:"#374151" }}>
+                <p style={{ margin: 0, fontSize: "14px", fontWeight: 600, color: "#374151" }}>
                   {carouselData[currentSlide].title}
                 </p>
               </div>
-              <div style={{ display:"flex", gap:"8px" }}>
+              <div style={{ display: "flex", gap: "8px" }}>
                 <button className="nav-btn" onClick={prevSlide} aria-label="Previous">
-                  <ChevronLeft style={{ fontSize:20 }} />
+                  <ChevronLeft style={{ fontSize: 20 }} />
                 </button>
                 <button className="nav-btn" onClick={nextSlide} aria-label="Next">
-                  <ChevronRight style={{ fontSize:20 }} />
+                  <ChevronRight style={{ fontSize: 20 }} />
                 </button>
               </div>
             </div>
 
             {/* Image frame */}
             <div style={{
-              borderRadius:"16px",
-              overflow:"hidden",
-              boxShadow:"0 4px 6px rgba(0,0,0,.04), 0 20px 50px rgba(0,0,0,.09), 0 0 0 1px rgba(0,0,0,.05)",
-              position:"relative",
-              aspectRatio:"16/9",
-              background:"#f9fafb",
+              borderRadius: "16px",
+              overflow: "hidden",
+              boxShadow: "0 4px 6px rgba(0,0,0,.04), 0 20px 50px rgba(0,0,0,.09), 0 0 0 1px rgba(0,0,0,.05)",
+              position: "relative",
+              aspectRatio: "16/9",
+              background: "#f9fafb",
             }}>
               <img
                 key={currentSlide}
                 src={carouselData[currentSlide].image}
                 alt={carouselData[currentSlide].title}
                 style={{
-                  width:"100%", height:"100%",
-                  objectFit:"cover", display:"block",
-                  transition:"opacity .35s ease",
+                  width: "100%", height: "100%",
+                  objectFit: "cover", display: "block",
+                  transition: "opacity .35s ease",
                 }}
               />
 
               {/* Caption */}
               <div style={{
-                position:"absolute", bottom:0, left:0, right:0,
-                padding:"40px 20px 20px",
-                background:"linear-gradient(to top, rgba(17,24,39,.78) 0%, transparent 100%)",
-                textAlign:"left",
+                position: "absolute", bottom: 0, left: 0, right: 0,
+                padding: "40px 20px 20px",
+                background: "linear-gradient(to top, rgba(17,24,39,.78) 0%, transparent 100%)",
+                textAlign: "left",
               }}>
-                <p style={{ margin:"0 0 3px", fontSize:"17px", fontWeight:700, color:"#fff" }}>
+                <p style={{ margin: "0 0 3px", fontSize: "17px", fontWeight: 700, color: "#fff" }}>
                   {carouselData[currentSlide].title}
                 </p>
-                <p style={{ margin:0, fontSize:"13px", color:"rgba(255,255,255,.72)" }}>
-                  {carouselData[currentSlide].description}
-                </p>
+              
               </div>
 
               {/* Counter badge */}
               <div style={{
-                position:"absolute", top:"14px", right:"14px",
-                background:"rgba(255,255,255,.88)",
-                backdropFilter:"blur(6px)",
-                border:"1px solid rgba(0,0,0,.06)",
-                borderRadius:"50px",
-                padding:"3px 12px",
-                fontSize:"12px", fontWeight:600, color:"#374151",
+                position: "absolute", top: "14px", right: "14px",
+                background: "rgba(255,255,255,.88)",
+                backdropFilter: "blur(6px)",
+                border: "1px solid rgba(0,0,0,.06)",
+                borderRadius: "50px",
+                padding: "3px 12px",
+                fontSize: "12px", fontWeight: 600, color: "#374151",
               }}>
                 {currentSlide + 1} / {carouselData.length}
               </div>
 
               {/* Progress bar */}
               <div style={{
-                position:"absolute", bottom:0, left:0, right:0,
-                height:"3px", background:"rgba(255,255,255,.18)",
+                position: "absolute", bottom: 0, left: 0, right: 0,
+                height: "3px", background: "rgba(255,255,255,.18)",
               }}>
                 <div
                   key={`prog-${currentSlide}`}
@@ -506,8 +513,8 @@ const Banner = () => {
             </div>
 
             {/* Dots */}
-            <div style={{ display:"flex", justifyContent:"center", gap:"6px", marginTop:"18px" }}>
-              {carouselData.map((_,i) => (
+            <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginTop: "18px" }}>
+              {carouselData.map((_, i) => (
                 <button
                   key={i}
                   className="dot-btn"
