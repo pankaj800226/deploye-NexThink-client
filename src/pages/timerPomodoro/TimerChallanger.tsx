@@ -54,7 +54,6 @@ const PRESETS: { label: string; val: number }[] = [
 const DAILY_GOAL_MIN = 60;
 
 /* ─── HELPERS ────────────────────────────────────────────────────────────── */
-// FIX 1: Local date function to avoid timezone issues
 const getLocalDayKey = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -87,33 +86,34 @@ const getBarKind = (min: number): BarKind => {
 const getStatColor = (val: number, good: number, mid: number): StatColor =>
   val >= good ? "green" : val >= mid ? "yellow" : "red";
 
-/* ─── CSS (Same as before, no changes) ──────────────────────────────────── */
+/* ─── WHITE THEME CSS ──────────────────────────────────────────────────── */
 const css = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #07090f;
-  --s1:        #0d1017;
-  --s2:        #131720;
-  --s3:        #1a1f2e;
-  --border:    #21273a;
-  --border2:   #2b3349;
-  --accent:    #4fffb0;
-  --accent2:   #00d4ff;
-  --accentRgb: 79,255,176;
-  --warn:      #ff5f5f;
-  --warnRgb:   255,95,95;
-  --gold:      #fbbf24;
-  --goldRgb:   251,191,36;
-  --partial:   #f97316;
+  --bg:        #FFFFFF;
+  --s1:        #F8F9FA;
+  --s2:        #F1F3F5;
+  --s3:        #E9ECEF;
+  --border:    #DEE2E6;
+  --border2:   #CED4DA;
+  --accent:    #1A73E8;
+  --accent2:   #4285F4;
+  --accentRgb: 26,115,232;
+  --warn:      #D93025;
+  --warnRgb:   217,48,37;
+  --gold:      #F59E0B;
+  --goldRgb:   245,158,11;
+  --partial:   #F97316;
   --partRgb:   249,115,22;
-  --text:      #e4e9f8;
-  --sub:       #5a6280;
+  --text:      #202124;
+  --sub:       #5F6368;
   --r:         14px;
   --rSm:       10px;
-  --shadow:    0 4px 32px rgba(0,0,0,0.55);
+  --shadow:    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .fc {
@@ -151,9 +151,9 @@ const css = `
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  color: #07090f;
+  color: white;
   flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(var(--accentRgb), 0.3);
+  box-shadow: 0 0 16px rgba(var(--accentRgb), 0.2);
 }
 .fc-nav-right { display: flex; align-items: center; gap: 10px; }
 .fc-badge {
@@ -183,11 +183,16 @@ const css = `
 }
 
 .fc-card {
-  background: var(--s1);
+  background: white;
   border: 1px solid var(--border);
   border-radius: var(--r);
   padding: clamp(16px, 2.5vw, 22px);
   box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+}
+.fc-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 .fc-card-hd {
   display: flex;
@@ -214,7 +219,7 @@ const css = `
 }
 .fc-inp {
   width: 100%;
-  background: var(--s2);
+  background: white;
   border: 1px solid var(--border);
   border-radius: var(--rSm);
   color: var(--text);
@@ -222,14 +227,14 @@ const css = `
   font-size: 14px; font-weight: 500;
   padding: 10px 13px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s;
   margin-bottom: 13px;
 }
 .fc-inp:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(var(--accentRgb), 0.1);
 }
-.fc-inp:disabled { opacity: 0.38; cursor: not-allowed; }
+.fc-inp:disabled { opacity: 0.5; cursor: not-allowed; background: var(--s2); }
 .fc-inp::placeholder { color: var(--sub); }
 input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
 
@@ -240,7 +245,7 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   margin-bottom: 18px;
 }
 .fc-pset {
-  background: var(--s2);
+  background: white;
   border: 1px solid var(--border);
   border-radius: var(--rSm);
   color: var(--sub);
@@ -252,7 +257,8 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 .fc-pset:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(var(--accentRgb), 0.07);
+  background: rgba(var(--accentRgb), 0.05);
+  transform: translateY(-1px);
 }
 .fc-pset:disabled { opacity: 0.3; cursor: not-allowed; }
 .fc-divider { height: 1px; background: var(--border); margin: 14px 0; }
@@ -268,8 +274,8 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 }
 .fc-ring-fill.pulse { animation: ringGlow 2s ease-in-out infinite; }
 @keyframes ringGlow {
-  0%,100% { filter: drop-shadow(0 0 4px rgba(var(--accentRgb),.45)); }
-  50%      { filter: drop-shadow(0 0 18px rgba(var(--accentRgb),.9)); }
+  0%,100% { filter: drop-shadow(0 0 4px rgba(var(--accentRgb),0.3)); }
+  50%      { filter: drop-shadow(0 0 18px rgba(var(--accentRgb),0.5)); }
 }
 .fc-ring-inner {
   position: absolute; inset: 0;
@@ -299,27 +305,32 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   padding: 11px 14px; cursor: pointer;
   transition: all 0.18s; white-space: nowrap;
 }
-.fc-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+.fc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .fc-btn-start {
-  background: linear-gradient(135deg, var(--accent), #00e896);
-  color: #07090f;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+  box-shadow: var(--shadow);
 }
-.fc-btn-start:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+.fc-btn-start:hover:not(:disabled) { 
+  filter: brightness(1.05); 
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
 .fc-btn-pause {
   background: rgba(var(--warnRgb), 0.1); color: var(--warn);
   border: 1px solid rgba(var(--warnRgb), 0.25);
 }
-.fc-btn-pause:hover { background: rgba(var(--warnRgb), 0.18); }
+.fc-btn-pause:hover { background: rgba(var(--warnRgb), 0.15); }
 .fc-btn-reset {
-  background: var(--s2); color: var(--sub);
+  background: white; color: var(--sub);
   border: 1px solid var(--border);
 }
-.fc-btn-reset:hover { color: var(--text); border-color: var(--border2); }
+.fc-btn-reset:hover { color: var(--text); border-color: var(--border2); background: var(--s2); }
 .fc-btn-save {
   background: rgba(var(--accentRgb), 0.08); color: var(--accent);
   border: 1px solid rgba(var(--accentRgb), 0.2);
 }
-.fc-btn-save:hover:not(:disabled) { background: rgba(var(--accentRgb), 0.16); }
+.fc-btn-save:hover:not(:disabled) { background: rgba(var(--accentRgb), 0.15); }
 
 .fc-chart-card { grid-area: chart; }
 .fc-chart-wrap { height: 190px; }
@@ -335,15 +346,21 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   max-height: 360px; overflow-y: auto; padding-right: 2px;
 }
 .fc-log-list::-webkit-scrollbar { width: 3px; }
-.fc-log-list::-webkit-scrollbar-track { background: transparent; }
-.fc-log-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.fc-log-list::-webkit-scrollbar-track { background: var(--s2); border-radius: 99px; }
+.fc-log-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
 .fc-log-item {
   display: flex; align-items: center; gap: 11px;
   padding: 11px 13px;
-  background: var(--s2); border: 1px solid var(--border);
-  border-radius: var(--rSm); transition: border-color 0.15s;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--rSm);
+  transition: all 0.15s;
 }
-.fc-log-item:hover { border-color: var(--border2); }
+.fc-log-item:hover { 
+  border-color: var(--accent); 
+  transform: translateX(2px);
+  box-shadow: var(--shadow);
+}
 .fc-log-icon {
   width: 34px; height: 34px; border-radius: 8px;
   background: rgba(var(--accentRgb), 0.08); color: var(--accent);
@@ -362,7 +379,7 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   background: none; border: none; color: var(--sub);
   cursor: pointer; padding: 6px; border-radius: 6px;
   display: flex; align-items: center;
-  transition: color 0.15s, background 0.15s; flex-shrink: 0;
+  transition: all 0.15s; flex-shrink: 0;
 }
 .fc-log-del:hover { color: var(--warn); background: rgba(var(--warnRgb), 0.08); }
 .fc-logs-empty {
@@ -443,7 +460,7 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   left: 0; right: 0;
   bottom: calc(var(--goal-pct, 60) * 1%);
   height: 1px;
-  background: repeating-linear-gradient(90deg, rgba(var(--accentRgb),.35) 0 4px, transparent 4px 8px);
+  background: repeating-linear-gradient(90deg, rgba(var(--accentRgb),0.4) 0 4px, transparent 4px 8px);
   z-index: 2;
   pointer-events: none;
 }
@@ -452,9 +469,9 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   bottom: 0; left: 0; right: 0;
   border-radius: 4px 4px 3px 3px;
 }
-.fc-day-bar-fill.good    { background: linear-gradient(to top, var(--accent), rgba(79,255,176,0.4)); }
-.fc-day-bar-fill.partial { background: linear-gradient(to top, var(--gold),   rgba(251,191,36,0.4)); }
-.fc-day-bar-fill.bad     { background: linear-gradient(to top, var(--warn),   rgba(255,95,95,0.35)); }
+.fc-day-bar-fill.good    { background: linear-gradient(to top, var(--accent), rgba(26,115,232,0.4)); }
+.fc-day-bar-fill.partial { background: linear-gradient(to top, var(--gold),   rgba(245,158,11,0.4)); }
+.fc-day-bar-fill.bad     { background: linear-gradient(to top, var(--warn),   rgba(217,48,37,0.35)); }
 .fc-day-bar-fill.empty   { background: var(--s3); }
 
 .fc-day-label {
@@ -485,7 +502,7 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
 }
 .fc-legend-dash {
   width: 16px; height: 1px;
-  background: repeating-linear-gradient(90deg, rgba(var(--accentRgb),.6) 0 3px, transparent 3px 6px);
+  background: repeating-linear-gradient(90deg, rgba(var(--accentRgb),0.6) 0 3px, transparent 3px 6px);
 }
 
 .fc-stats-grid {
@@ -495,14 +512,18 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   margin-top: 14px;
 }
 .fc-stat-box {
-  background: var(--s2);
+  background: white;
   border: 1px solid var(--border);
   border-radius: var(--rSm);
   padding: 12px 13px;
   display: flex; flex-direction: column; gap: 3px;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
 }
-.fc-stat-box:hover { border-color: var(--border2); }
+.fc-stat-box:hover { 
+  border-color: var(--accent); 
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
 .fc-stat-label {
   font-size: 9px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.9px;
@@ -563,7 +584,6 @@ const TimerChallanger: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const token = localStorage.getItem("TOKEN");
 
-  /* ── FIX: Audio play with error handling ── */
   const playSound = useCallback(async () => {
     if (audioRef.current && !audioError) {
       setLoading(true);
@@ -580,7 +600,6 @@ const TimerChallanger: React.FC = () => {
     }
   }, [audioError]);
 
-  /* ── fetch timers ── */
   const fetchTimers = useCallback(async (): Promise<void> => {
     if (!token) {
       toast.error("Please login again");
@@ -590,10 +609,9 @@ const TimerChallanger: React.FC = () => {
       const res = await axios.get<ITimer[]>(`${api}/api/timer/getTimers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // FIX: Validate timer data
       const validTimers = res.data.filter(t => {
         const mins = t.spentMin ?? 0;
-        const isValid = mins >= 0 && mins <= 1440; // Max 24 hours
+        const isValid = mins >= 0 && mins <= 1440;
         if (!isValid) {
           console.warn("Invalid timer found:", t);
         }
@@ -604,7 +622,6 @@ const TimerChallanger: React.FC = () => {
       console.error('Failed to fetch timers:', err);
       toast.error("Failed to load sessions");
       setError("Something went wrong")
-
     } finally {
       setLoading(false)
     }
@@ -614,7 +631,6 @@ const TimerChallanger: React.FC = () => {
     fetchTimers();
   }, [fetchTimers]);
 
-  /* ── FIX: Timer countdown engine with proper cleanup ── */
   useEffect(() => {
     let id: ReturnType<typeof setInterval> | undefined;
 
@@ -638,7 +654,6 @@ const TimerChallanger: React.FC = () => {
     };
   }, [isRunning, timeLeft, playSound]);
 
-  /* ── handlers ── */
   const startSession = useCallback((mins: number): void => {
     if (isRunning) {
       toast.error("Current session finish karo pehle");
@@ -678,11 +693,9 @@ const TimerChallanger: React.FC = () => {
     } catch {
       toast.error("Delete failed");
       setError("Something went wrong")
-
     }
   }, [token, fetchTimers]);
 
-  // FIX: Save session with validation
   const handleSave = useCallback(async (): Promise<void> => {
     const spent = totalInitialSeconds - timeLeft;
 
@@ -704,7 +717,6 @@ const TimerChallanger: React.FC = () => {
     const spentMin = Math.floor(spent / 60);
     const spentSec = spent % 60;
 
-    // FIX: Validate minutes
     if (spentMin > 1440) {
       toast.error("Invalid session duration");
       return;
@@ -746,25 +758,23 @@ const TimerChallanger: React.FC = () => {
     return `${h > 0 ? h + ":" : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   }, []);
 
-  /* ── SVG ring ── */
   const RADIUS = 78;
   const CIRC = 2 * Math.PI * RADIUS;
   const dashOff = totalInitialSeconds > 0
     ? CIRC * (1 - timeLeft / totalInitialSeconds)
     : CIRC;
 
-  /* ── Chart Data ── */
   const chartData = useMemo(() => ({
     labels: timers.slice(-8).map(t => t.routineTitle.substring(0, 7)),
     datasets: [{
       data: timers.slice(-8).map(t => t.spentMin),
-      borderColor: "#4fffb0",
-      backgroundColor: "rgba(79,255,176,0.06)",
+      borderColor: "#1A73E8",
+      backgroundColor: "rgba(26,115,232,0.06)",
       fill: true,
       tension: 0.45,
       pointRadius: 4,
-      pointBackgroundColor: "#4fffb0",
-      pointBorderColor: "#07090f",
+      pointBackgroundColor: "#1A73E8",
+      pointBorderColor: "white",
       pointBorderWidth: 2,
     }],
   }), [timers]);
@@ -774,29 +784,23 @@ const TimerChallanger: React.FC = () => {
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { color: "#1a1f2e" }, ticks: { color: "#5a6280", font: { family: "Space Mono", size: 10 } } },
-      y: { grid: { color: "#1a1f2e" }, ticks: { color: "#5a6280", font: { family: "Space Mono", size: 10 } } },
+      x: { grid: { color: "#E9ECEF" }, ticks: { color: "#5F6368", font: { family: "Space Mono", size: 10 } } },
+      y: { grid: { color: "#E9ECEF" }, ticks: { color: "#5F6368", font: { family: "Space Mono", size: 10 } } },
     },
   }), []);
 
-  /* ══════════════════════════════════════
-     FIX: 15-DAY PROGRESS DATA WITH LOCAL DATES
-  ══════════════════════════════════════ */
   const days15 = useMemo<DayEntry[]>(() => getLast15Days(), []);
 
-  // FIX: Use local date for daily map
   const dailyMap = useMemo<Record<string, number>>(() => {
     const map: Record<string, number> = {};
 
     timers.forEach(t => {
       if (!t.createdAt) return;
 
-      // Use local date to avoid timezone issues
       const date = new Date(t.createdAt);
       const key = getLocalDayKey(date);
       const mins = t.spentMin ?? 0;
 
-      // FIX: Only add valid minutes
       if (mins > 0 && mins <= 1440) {
         map[key] = (map[key] ?? 0) + mins;
       }
@@ -805,7 +809,6 @@ const TimerChallanger: React.FC = () => {
     return map;
   }, [timers]);
 
-  // FIX: Calculate max day minutes from last 15 days only
   const maxDayMin = useMemo<number>(() => {
     const vals = days15.map(d => dailyMap[d.key] ?? 0);
     const maxVal = Math.max(...vals, DAILY_GOAL_MIN, 1);
@@ -816,7 +819,6 @@ const TimerChallanger: React.FC = () => {
     return Math.min(Math.round((DAILY_GOAL_MIN / maxDayMin) * 100), 100);
   }, [maxDayMin]);
 
-  // FIX: Stats calculation using only last 15 days
   const stats = useMemo(() => {
     let goodDays = 0;
     let badDays = 0;
@@ -834,7 +836,6 @@ const TimerChallanger: React.FC = () => {
 
     const avgMin = Math.round(totalMin15 / 15);
 
-    // Calculate streak
     let streak = 0;
     for (let i = days15.length - 1; i >= 0; i--) {
       const mins = dailyMap[days15[i].key] ?? 0;
@@ -842,7 +843,6 @@ const TimerChallanger: React.FC = () => {
       else break;
     }
 
-    // Verdict
     const goodRatio = goodDays / 15;
     const verdict: VerdictKind = goodRatio >= 0.6 ? "good" : goodRatio >= 0.3 ? "neutral" : "bad";
     const verdictText = verdict === "good" ? "🔥 On Fire" : verdict === "neutral" ? "〜 Average" : "📉 Needs Work";
@@ -869,24 +869,9 @@ const TimerChallanger: React.FC = () => {
     <div className="fc">
       <style>{css}</style>
 
-      {/* Navbar */}
-      {/* <div className="fc-nav">
-        <div className="fc-logo">
-          <div className="fc-logo-icon">
-            <Zap size={18} />
-          </div>
-          <span>FocusChallanger</span>
-        </div>
-        <div className="fc-nav-right">
-          <div className="fc-badge">⚡ focus mode</div>
-        </div>
-      </div> */}
-
       <div className="fc-page">
 
-        {/* ════════════════════════════════
-            15-DAY PROGRESS (FIXED)
-        ════════════════════════════════ */}
+        {/* 15-DAY PROGRESS */}
         <div className="fc-card fc-progress-card">
 
           <div className="fc-progress-top">
@@ -952,7 +937,7 @@ const TimerChallanger: React.FC = () => {
             <div className="fc-legend-goal"><div className="fc-legend-dash" /> Goal line</div>
           </div>
 
-          {/* ── STATS (FIXED) ── */}
+          {/* STATS */}
           <div className="fc-stats-grid">
             <div className="fc-stat-box">
               <div className="fc-stat-label">Good Days</div>
@@ -988,7 +973,7 @@ const TimerChallanger: React.FC = () => {
           </div>
         </div>
 
-        {/* ── TIMER CONTROL (Same) ── */}
+        {/* TIMER CONTROL */}
         <div className="fc-card fc-timer-card">
           <div className="fc-card-hd"><Zap size={13} /> Timer Control</div>
 
@@ -1075,7 +1060,7 @@ const TimerChallanger: React.FC = () => {
           )}
         </div>
 
-        {/* ── CHART (Same) ── */}
+        {/* CHART */}
         <div className="fc-card fc-chart-card">
           <div className="fc-card-hd"><TrendingUp size={13} /> Weekly Output (minutes)</div>
           <div className="fc-chart-wrap">
@@ -1090,7 +1075,7 @@ const TimerChallanger: React.FC = () => {
           </div>
         </div>
 
-        {/* ── LOGS (Same) ── */}
+        {/* LOGS */}
         <div className="fc-card fc-logs-card">
           <div className="fc-card-hd"><ListChecks size={13} /> Session Logs : {timers.length}</div>
           <div className="fc-log-list">

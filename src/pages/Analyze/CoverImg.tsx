@@ -88,19 +88,27 @@ const CoverImg = () => {
 
 
     return (
-        <div className="cover-wrapper">
+        <div className="relative w-full h-[200px] md:h-[280px] overflow-hidden group z-0">
+            {/* Main Image */}
             <img
                 src={covers?.coverPhoto || coverImg}
                 alt="cover"
-                className="cover-img"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
 
-            <div className="cover-actions">
+            {/* Overlay - Iska z-index high rakha hai */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 z-10 flex items-end justify-end p-4 md:p-8">
+
                 <Button
-                    className={`cover-btn edit ${uploading ? "uploading" : ""}`}
+                    className="!bg-white/90 !backdrop-blur-md !text-slate-700 !normal-case !text-xs md:!text-sm !font-semibold !px-4 !py-1.5 !rounded-lg !shadow-lg !border !border-gray-200 !transition-all !duration-300 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
                     component="label"
+                    disabled={uploading}
+                    sx={{
+                        // Inline style to force visibility on hover if Tailwind classes struggle
+                        '&:hover': { backgroundColor: 'white !important' }
+                    }}
                 >
-                    <Upload fontSize="small" />
+                    <Upload className="mr-2 !text-[18px]" />
                     {uploading ? "Uploading..." : "Change cover"}
                     <input
                         onChange={handleFile}

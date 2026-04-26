@@ -4,10 +4,8 @@ export const commandRoutes = [
 
   // Timer & Fun Pages
   { name: "Time Challenger", path: "/timechallaner" },
-  { name: "Think & Draw", path: "/thinkdrow" },
 
   // Dashboard / Profile
-  { name: "Dashboard", path: "/dashboard" },
   { name: "Profile", path: "/profile" },
 
   // Todo List
@@ -15,17 +13,11 @@ export const commandRoutes = [
   { name: "Manage Todo", path: "/managetodo" },
 
   // Work Scheduler
-  { name: "Create Scheduler", path: "/createshedular" },
+  { name: "Habit Tracker", path: "/habittracker" },
 
   // Analyze
   { name: "Todo Analyze", path: "/analyze" },
-  { name: "Project Analyzer", path: "/projectanalyzer" },
-
-  // Project Management
-  { name: "Create Project", path: "/createProject" },
-  { name: "Manage Project", path: "/manageproject" },
-
 
   // Routing Goals
-  { name: "Routine", path: "/routing" },
+  { name: "Daily Planner", path: "/dailyplanner" },
 ];

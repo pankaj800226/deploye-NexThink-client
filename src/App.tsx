@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Loading from './components/Loading'
 import { Toaster } from 'react-hot-toast'
@@ -15,10 +15,8 @@ const ForgetPassword = React.lazy(() => import('./components/auth/ForgetPassword
 const OtpVerify = React.lazy(() => import('./components/auth/OtpVerify'))
 const UpdatePassword = React.lazy(() => import('./components/auth/UpdatePassword'))
 const TimerChallanger = React.lazy(() => import('./pages/timerPomodoro/TimerChallanger'))
+const About = React.lazy(() => import('./components/About'))
 
-
-
-const Dashboard = React.lazy(() => import('./pages/Dashboard'))
 const Profile = React.lazy(() => import('./pages/Profile'))
 
 // todo list
@@ -32,15 +30,6 @@ const CreateHabitTracker = React.lazy(() => import('./pages/habitTracker/CreateH
 
 // analyze
 const Analyze = React.lazy(() => import('./pages/Analyze/TodoAnalyze'))
-const ProjectAnalyzer = React.lazy(() => import('./pages/Analyze/ProjectAnalyzer'))
-
-// project-management
-const CreateProject = React.lazy(() => import('./pages/project-management/CreateProject'))
-const ManageProject = React.lazy(() => import('./pages/project-management/ManageProject'))
-const ProjectDetails = React.lazy(() => import('./pages/project-management/ProjectDetails'))
-const ProjectEdit = React.lazy(() => import('./pages/project-management/ProjectEdit'))
-// feature
-const EditFeature = React.lazy(() => import('./pages/project-management/feature/EditFeature'))
 
 
 // routing gols 
@@ -48,74 +37,34 @@ const DailyPlanner = React.lazy(() => import('./pages/dailyplanner/DailyPlanner'
 
 
 
-// style configration
-import './styles/app.scss'
-import './styles/loading.scss'
-import './styles/sidebaar.scss'
-import './styles/header.scss'
-import './styles/banner.scss'
-import './styles/feature.scss'
-import './styles/register.scss'
-import './styles/profile.scss'
-import './styles/feedback.scss'
-import './styles/commandPalette.scss'
-
-
-
-// task
-import './styles/Task-management/manageTodo.scss'
-import './styles/Task-management/createTask.scss'
-import './styles/Task-management/todoDetails.scss'
-
-
-// time challanger
-import './styles/timer/timechallange.scss'
-
-// work shedular
-import './styles/habitTracker/createHabitTracker.scss'
-
-
-// anzlyze
-import './styles/Analyze/analyze.scss'
-import './styles/Analyze/coverImg.scss'
-
-// project-management
-import './styles/project-management/manageProject.scss'
-import './styles/project-management/projectDetails.scss'
-import './styles/project-management/allFeature.scss'
-
-
-// routing
-import './styles/dailyplanner/dailyplanner.scss'
-
-
 const AppLayout = () => {
-  const location = useLocation()
+  // const location = useLocation()
 
-  const hideHeaderRoutes = [
-    "/dashboard",
-    "/createTodo",
-    "/managetodo",
-    "/profile",
-    "/todoEdit",
-    "/todoDetails",
-    "/analyze",
-    "/createProject",
-    "/manageproject",
-    "/projectanalyzer",
-    "/projectdetails",
-    "/projectedit",
-    "/editfeature",
-  ];
+  // const hideHeaderRoutes = [
+  //   "/dashboard",
+  //   "/createTodo",
+  //   "/managetodo",
+  //   "/profile",
+  //   "/todoEdit",
+  //   "/todoDetails",
+  //   "/analyze",
+  //   "/createProject",
+  //   "/manageproject",
+  //   "/projectanalyzer",
+  //   "/projectdetails",
+  //   "/projectedit",
+  //   "/editfeature",
+  // ];
 
-  // dashboard route check
-  const hideHeader = hideHeaderRoutes.some(route =>
-    location.pathname.startsWith(route)
-  );
+  // // dashboard route check
+  // const hideHeader = hideHeaderRoutes.some(route =>
+  //   location.pathname.startsWith(route)
+  // );
 
   return (
     <>
-      {!hideHeader && <Header />}
+      {/* {!hideHeader && <Header />} */}
+      <Header />
       <Suspense fallback={<Loading />}>
         <CommandPalette />
 
@@ -126,15 +75,16 @@ const AppLayout = () => {
           <Route path='/forgetpassword' element={<ForgetPassword />} />
           <Route path='/otpverify' element={<OtpVerify />} />
           <Route path='/updatepassword' element={<UpdatePassword />} />
+          <Route path='/about' element={<About />} />
 
 
+          {/* // saved route  */}
           <Route element={<SaveRoute />}>
-
             <Route path='/timechallaner' element={<TimerChallanger />} />
 
             {/*In dashboard all page will be here */}
-            <Route path='/dashboard' element={<Dashboard />} />
             <Route path='/profile' element={<Profile />} />
+
             {/* todo part */}
             <Route path='/createTodo' element={<CreateTodo />} />
             <Route path='/managetodo' element={<ManageTodo />} />
@@ -146,16 +96,6 @@ const AppLayout = () => {
 
             {/* analyze */}
             <Route path='/analyze' element={<Analyze />} />
-            <Route path='/projectanalyzer' element={<ProjectAnalyzer />} />
-
-            {/* project-management */}
-            <Route path='/createProject' element={<CreateProject />} />
-            <Route path='/manageproject' element={<ManageProject />} />
-            <Route path='/projectdetails/:id' element={<ProjectDetails />} />
-            <Route path='/projectedit/:id' element={<ProjectEdit />} />
-
-            {/* edit feature */}
-            <Route path='/editfeature/:id' element={<EditFeature />} />
 
             {/* routing gols  */}
             <Route path='/dailyplanner' element={<DailyPlanner />} />
@@ -164,7 +104,7 @@ const AppLayout = () => {
 
 
           </Route>
-
+          {/* end save  */}
         </Routes>
         <Toaster
           position="bottom-right"
