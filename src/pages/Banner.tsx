@@ -413,7 +413,7 @@ const Banner = () => {
               marginBottom: "64px", flexWrap: "wrap",
             }}
           >
-            <Link to="/dashboard" style={{ textDecoration: "none" }}>
+            <Link to="/timechallaner" style={{ textDecoration: "none" }}>
               <button className="cta-btn">
                 Get Started Free
                 <ArrowRightAlt style={{ fontSize: 20 }} />
