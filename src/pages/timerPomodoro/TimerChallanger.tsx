@@ -8,10 +8,10 @@ import {
 import axios from "axios";
 import { api } from "../../api/api";
 import toast from "react-hot-toast";
-import sound from "../../assets/alarm.mp3";
 import {
   Play, Pause, RotateCcw, Save, Trash2, Target,
-  Zap, TrendingUp, TrendingDown, ListChecks, Flame, Minus
+  Zap, TrendingUp, TrendingDown, ListChecks, Flame, Minus,
+  Volume2, VolumeX, Music, Upload, Trash
 } from "lucide-react";
 import ApiError from "../../components/ApiError";
 import Loading from "../../components/Loading";
@@ -37,6 +37,12 @@ interface DayEntry {
   isToday: boolean;
 }
 
+interface CustomSound {
+  name: string;
+  url: string;
+  id: string;
+}
+
 type BarKind = "good" | "partial" | "bad" | "empty";
 type VerdictKind = "good" | "neutral" | "bad";
 type StatColor = "green" | "yellow" | "red";
@@ -52,6 +58,14 @@ const PRESETS: { label: string; val: number }[] = [
 ];
 
 const DAILY_GOAL_MIN = 60;
+
+// Default alarm sounds with working URLs
+const DEFAULT_SOUNDS = [
+  { name: "🔔 Classic Bell", url: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8c8c8c8.mp3?filename=bell-ringing-05-102508.mp3", type: "default", id: "default-1" },
+  { name: "✨ Gentle Chime", url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_8a8a8a8a8a.mp3?filename=chime-up-1-103394.mp3", type: "default", id: "default-2" },
+  { name: "⏰ Alarm Clock", url: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c2c2c2c2c2.mp3?filename=alarm-clock-01-104507.mp3", type: "default", id: "default-3" },
+  { name: "🎵 Soft Piano", url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0d0d0d0d0.mp3?filename=notification-sound-7062.mp3", type: "default", id: "default-4" },
+];
 
 /* ─── HELPERS ────────────────────────────────────────────────────────────── */
 const getLocalDayKey = (date: Date): string => {
@@ -125,47 +139,6 @@ const css = `
   background: var(--bg);
 }
 
-.fc-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(16px, 4vw, 36px);
-  height: 62px;
-  background: var(--s1);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(12px);
-}
-.fc-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 800;
-  font-size: 17px;
-  letter-spacing: -0.4px;
-}
-.fc-logo-icon {
-  width: 34px; height: 34px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-  color: white;
-  flex-shrink: 0;
-  box-shadow: 0 0 16px rgba(var(--accentRgb), 0.2);
-}
-.fc-nav-right { display: flex; align-items: center; gap: 10px; }
-.fc-badge {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  background: rgba(var(--accentRgb), 0.08);
-  color: var(--accent);
-  border: 1px solid rgba(var(--accentRgb), 0.2);
-  padding: 4px 12px;
-  border-radius: 99px;
-}
-
 .fc-page {
   flex: 1;
   display: grid;
@@ -236,7 +209,6 @@ const css = `
 }
 .fc-inp:disabled { opacity: 0.5; cursor: not-allowed; background: var(--s2); }
 .fc-inp::placeholder { color: var(--sub); }
-input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none; }
 
 .fc-presets {
   display: grid;
@@ -331,6 +303,126 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   border: 1px solid rgba(var(--accentRgb), 0.2);
 }
 .fc-btn-save:hover:not(:disabled) { background: rgba(var(--accentRgb), 0.15); }
+
+/* Music Selector Styles */
+.music-selector {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.music-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.music-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sub);
+}
+.music-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.music-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--s2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.music-item:hover {
+  background: var(--s3);
+}
+.music-item.active {
+  background: rgba(var(--accentRgb), 0.1);
+  border: 1px solid var(--accent);
+}
+.music-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.music-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+.music-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  background: var(--accent);
+  color: white;
+  border-radius: 4px;
+}
+.music-actions {
+  display: flex;
+  gap: 6px;
+}
+.music-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sub);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-remove:hover {
+  background: rgba(var(--warnRgb), 0.1);
+  color: var(--warn);
+}
+.upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  background: var(--s2);
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upload-btn:hover {
+  background: var(--s3);
+  border-color: var(--accent);
+}
+.clear-all-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  background: rgba(var(--warnRgb), 0.05);
+  border: 1px solid rgba(var(--warnRgb), 0.2);
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--warn);
+}
+.clear-all-btn:hover {
+  background: rgba(var(--warnRgb), 0.1);
+}
 
 .fc-chart-card { grid-area: chart; }
 .fc-chart-wrap { height: 190px; }
@@ -560,8 +652,6 @@ input[type=number].fc-inp::-webkit-inner-spin-button { -webkit-appearance: none;
   .fc-day-label { font-size: 7px; }
 }
 @media (max-width: 420px) {
-  .fc-nav { padding: 0 14px; }
-  .fc-logo span { display: none; }
   .fc-ring { width: 148px; height: 148px; }
   .fc-big-time { font-size: 24px; }
   .fc-day-bar-track { height: 52px; }
@@ -577,28 +667,144 @@ const TimerChallanger: React.FC = () => {
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [timers, setTimers] = useState<ITimer[]>([]);
   const [btnLoader, setBtnLoader] = useState<boolean>(false);
-  const [audioError, setAudioError] = useState<boolean>(false);
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [hasPlayedEndSound, setHasPlayedEndSound] = useState<boolean>(false);
+  
+  // Music/Sound States
+  const [selectedSound, setSelectedSound] = useState<string | null>(null);
+  const [customSounds, setCustomSounds] = useState<CustomSound[]>([]);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [soundVolume, setSoundVolume] = useState<number>(0.7);
+  const [currentPlayingSound, setCurrentPlayingSound] = useState<HTMLAudioElement | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const token = localStorage.getItem("TOKEN");
 
-  const playSound = useCallback(async () => {
-    if (audioRef.current && !audioError) {
-      setLoading(true);
+  // Stop any currently playing sound
+  const stopCurrentSound = useCallback(() => {
+    if (currentPlayingSound) {
+      currentPlayingSound.pause();
+      currentPlayingSound.currentTime = 0;
+      setCurrentPlayingSound(null);
+    }
+  }, [currentPlayingSound]);
+
+  // Load saved sound preference from localStorage
+  useEffect(() => {
+    const savedSound = localStorage.getItem('selectedTimerSound');
+    const savedCustomSounds = localStorage.getItem('customTimerSounds');
+    const savedMuted = localStorage.getItem('timerSoundMuted');
+    const savedVolume = localStorage.getItem('timerSoundVolume');
+    
+    if (savedSound) setSelectedSound(savedSound);
+    if (savedCustomSounds) {
       try {
-        await audioRef.current.play();
+        setCustomSounds(JSON.parse(savedCustomSounds));
+      } catch (e) {
+        console.error("Failed to parse custom sounds");
+      }
+    }
+    if (savedMuted) setIsMuted(JSON.parse(savedMuted));
+    if (savedVolume) setSoundVolume(parseFloat(savedVolume));
+  }, []);
+
+  // Save sound preference to localStorage (no test play)
+  const saveSoundPreference = (soundUrl: string | null) => {
+    setSelectedSound(soundUrl);
+    if (soundUrl) {
+      localStorage.setItem('selectedTimerSound', soundUrl);
+    } else {
+      localStorage.removeItem('selectedTimerSound');
+    }
+  };
+
+  const saveMutedPreference = (muted: boolean) => {
+    setIsMuted(muted);
+    localStorage.setItem('timerSoundMuted', JSON.stringify(muted));
+  };
+
+  const saveVolumePreference = (volume: number) => {
+    setSoundVolume(volume);
+    localStorage.setItem('timerSoundVolume', volume.toString());
+  };
+
+  const saveCustomSound = (file: File) => {
+    const url = URL.createObjectURL(file);
+    const newSound: CustomSound = { 
+      name: file.name.replace(/\.[^/.]+$/, ""), 
+      url, 
+      id: Date.now().toString() 
+    };
+    const updatedSounds = [...customSounds, newSound];
+    setCustomSounds(updatedSounds);
+    localStorage.setItem('customTimerSounds', JSON.stringify(updatedSounds));
+    toast.success(`Added sound: ${newSound.name}`);
+  };
+
+  const removeCustomSound = (id: string) => {
+    const soundToRemove = customSounds.find(s => s.id === id);
+    const updatedSounds = customSounds.filter(s => s.id !== id);
+    setCustomSounds(updatedSounds);
+    localStorage.setItem('customTimerSounds', JSON.stringify(updatedSounds));
+    
+    if (selectedSound === soundToRemove?.url) {
+      saveSoundPreference(null);
+    }
+    toast.success("Sound removed");
+  };
+
+  const clearAllCustomSounds = () => {
+    setCustomSounds([]);
+    localStorage.removeItem('customTimerSounds');
+    if (selectedSound && !DEFAULT_SOUNDS.some(s => s.url === selectedSound)) {
+      saveSoundPreference(null);
+    }
+    toast.success("All custom sounds cleared");
+  };
+
+  // Play sound only when timer ends
+  const playEndSound = useCallback(async () => {
+    // Stop any currently playing sound first
+    stopCurrentSound();
+    
+    if (isMuted) {
+      toast.success("🎉 Focus session complete!", { duration: 5000 });
+      return;
+    }
+
+    if (selectedSound) {
+      try {
+        // Create a new audio element for the end sound
+        const endSound = new Audio(selectedSound);
+        endSound.volume = soundVolume;
+        setCurrentPlayingSound(endSound);
+        
+        // Add event listener to clear reference when sound ends
+        endSound.addEventListener('ended', () => {
+          setCurrentPlayingSound(null);
+        });
+        
+        const playPromise = endSound.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              toast.success("🎉 Focus session complete!", { duration: 3000 });
+            })
+            .catch((err) => {
+              console.log("Audio playback failed:", err);
+              toast.success("🎉 Focus session complete!", { duration: 5000 });
+              setCurrentPlayingSound(null);
+            });
+        }
       } catch (err) {
-        console.log("Audio playback failed:", err);
-        setAudioError(true);
+        console.log("Audio error:", err);
         toast.success("🎉 Focus session complete!", { duration: 5000 });
-        setError("Something went wrong")
       }
     } else {
       toast.success("🎉 Focus session complete!", { duration: 5000 });
     }
-  }, [audioError]);
+  }, [selectedSound, isMuted, soundVolume, stopCurrentSound]);
 
   const fetchTimers = useCallback(async (): Promise<void> => {
     if (!token) {
@@ -612,18 +818,15 @@ const TimerChallanger: React.FC = () => {
       const validTimers = res.data.filter(t => {
         const mins = t.spentMin ?? 0;
         const isValid = mins >= 0 && mins <= 1440;
-        if (!isValid) {
-          console.warn("Invalid timer found:", t);
-        }
         return isValid;
       });
       setTimers(validTimers);
     } catch (err) {
       console.error('Failed to fetch timers:', err);
       toast.error("Failed to load sessions");
-      setError("Something went wrong")
+      setError("Something went wrong");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }, [token]);
 
@@ -631,6 +834,7 @@ const TimerChallanger: React.FC = () => {
     fetchTimers();
   }, [fetchTimers]);
 
+  // Timer countdown effect
   useEffect(() => {
     let id: ReturnType<typeof setInterval> | undefined;
 
@@ -644,33 +848,45 @@ const TimerChallanger: React.FC = () => {
           return prev - 1;
         });
       }, 1000);
-    } else if (timeLeft === 0 && isRunning) {
-      setIsRunning(false);
-      playSound();
     }
 
     return () => {
       if (id) clearInterval(id);
     };
-  }, [isRunning, timeLeft, playSound]);
+  }, [isRunning, timeLeft]);
 
+  // Play sound when timer reaches 0
+  useEffect(() => {
+    if (timeLeft === 0 && !isRunning && totalInitialSeconds > 0 && !hasPlayedEndSound) {
+      playEndSound();
+      setHasPlayedEndSound(true);
+    }
+  }, [timeLeft, isRunning, totalInitialSeconds, playEndSound, hasPlayedEndSound]);
+
+  // Reset sound played flag when starting new session
   const startSession = useCallback((mins: number): void => {
     if (isRunning) {
-      toast.error("Current session finish karo pehle");
+      toast.error("Complete current session first");
       return;
     }
+    // Stop any playing sound before starting new session
+    stopCurrentSound();
     const secs = mins * 60;
     setCustomMin(mins);
     setTimeLeft(secs);
     setTotalInitialSeconds(secs);
     setIsRunning(true);
-  }, [isRunning]);
+    setHasPlayedEndSound(false);
+  }, [isRunning, stopCurrentSound]);
 
   const handleStart = useCallback((): void => {
     if (isRunning) return;
 
     if (timeLeft > 0) {
+      // Stop any playing sound before resuming
+      stopCurrentSound();
       setIsRunning(true);
+      setHasPlayedEndSound(false);
       return;
     }
 
@@ -680,7 +896,7 @@ const TimerChallanger: React.FC = () => {
     }
 
     startSession(Number(customMin));
-  }, [isRunning, timeLeft, customMin, startSession]);
+  }, [isRunning, timeLeft, customMin, startSession, stopCurrentSound]);
 
   const handleDelete = useCallback(async (id: string): Promise<void> => {
     if (!token) return;
@@ -692,11 +908,14 @@ const TimerChallanger: React.FC = () => {
       toast.success("Session deleted");
     } catch {
       toast.error("Delete failed");
-      setError("Something went wrong")
+      setError("Something went wrong");
     }
   }, [token, fetchTimers]);
 
   const handleSave = useCallback(async (): Promise<void> => {
+    // Stop any playing sound when saving
+    stopCurrentSound();
+    
     const spent = totalInitialSeconds - timeLeft;
 
     if (!routineTitle.trim()) {
@@ -737,19 +956,22 @@ const TimerChallanger: React.FC = () => {
       resetAll();
     } catch {
       toast.error("Save error");
-      setError("Something went wrong")
+      setError("Something went wrong");
     } finally {
       setBtnLoader(false);
     }
-  }, [routineTitle, totalInitialSeconds, timeLeft, token, fetchTimers]);
+  }, [routineTitle, totalInitialSeconds, timeLeft, token, fetchTimers, stopCurrentSound]);
 
   const resetAll = useCallback((): void => {
+    // Stop any playing sound when resetting
+    stopCurrentSound();
     setIsRunning(false);
     setTimeLeft(0);
     setTotalInitialSeconds(0);
     setCustomMin("");
     setRoutineTitle("");
-  }, []);
+    setHasPlayedEndSound(false);
+  }, [stopCurrentSound]);
 
   const fmt = useCallback((s: number): string => {
     const h = Math.floor(s / 3600);
@@ -790,22 +1012,17 @@ const TimerChallanger: React.FC = () => {
   }), []);
 
   const days15 = useMemo<DayEntry[]>(() => getLast15Days(), []);
-
   const dailyMap = useMemo<Record<string, number>>(() => {
     const map: Record<string, number> = {};
-
     timers.forEach(t => {
       if (!t.createdAt) return;
-
       const date = new Date(t.createdAt);
       const key = getLocalDayKey(date);
       const mins = t.spentMin ?? 0;
-
       if (mins > 0 && mins <= 1440) {
         map[key] = (map[key] ?? 0) + mins;
       }
     });
-
     return map;
   }, [timers]);
 
@@ -820,60 +1037,42 @@ const TimerChallanger: React.FC = () => {
   }, [maxDayMin]);
 
   const stats = useMemo(() => {
-    let goodDays = 0;
-    let badDays = 0;
-    let emptyDays = 0;
-    let totalMin15 = 0;
-
+    let goodDays = 0, badDays = 0, emptyDays = 0, totalMin15 = 0;
     days15.forEach(day => {
       const mins = dailyMap[day.key] ?? 0;
       totalMin15 += mins;
-
       if (mins >= DAILY_GOAL_MIN) goodDays++;
       else if (mins > 0 && mins < DAILY_GOAL_MIN) badDays++;
       else if (mins === 0) emptyDays++;
     });
-
     const avgMin = Math.round(totalMin15 / 15);
-
     let streak = 0;
     for (let i = days15.length - 1; i >= 0; i--) {
       const mins = dailyMap[days15[i].key] ?? 0;
       if (mins >= DAILY_GOAL_MIN) streak++;
       else break;
     }
-
     const goodRatio = goodDays / 15;
     const verdict: VerdictKind = goodRatio >= 0.6 ? "good" : goodRatio >= 0.3 ? "neutral" : "bad";
     const verdictText = verdict === "good" ? "🔥 On Fire" : verdict === "neutral" ? "〜 Average" : "📉 Needs Work";
-
-    return {
-      goodDays,
-      badDays,
-      emptyDays,
-      totalMin15,
-      avgMin,
-      streak,
-      verdict,
-      verdictText
-    };
+    return { goodDays, badDays, emptyDays, totalMin15, avgMin, streak, verdict, verdictText };
   }, [days15, dailyMap]);
 
   const statusLabel = isRunning ? "focusing" : timeLeft > 0 ? "paused" : "ready";
   const statusClass = isRunning ? "active" : timeLeft > 0 ? "paused" : "";
 
-  if (error) return <ApiError error={error} />
-  if (loading) return <Loading />
+  const allSounds = [...DEFAULT_SOUNDS, ...customSounds];
+
+  if (error) return <ApiError error={error} />;
+  if (loading) return <Loading />;
 
   return (
     <div className="fc">
       <style>{css}</style>
 
       <div className="fc-page">
-
         {/* 15-DAY PROGRESS */}
         <div className="fc-card fc-progress-card">
-
           <div className="fc-progress-top">
             <div className="fc-card-hd" style={{ marginBottom: 0 }}>
               <Flame size={13} /> 15-Day Progress
@@ -891,44 +1090,28 @@ const TimerChallanger: React.FC = () => {
             </div>
           </div>
 
-          {/* BAR GRID */}
-          <div
-            className="fc-days-grid"
-            style={{ '--goal-pct': goalPct } as React.CSSProperties}
-          >
+          <div className="fc-days-grid" style={{ '--goal-pct': goalPct } as React.CSSProperties}>
             {days15.map((day, i) => {
               const min = dailyMap[day.key] ?? 0;
               const kind = getBarKind(min);
-              const heightPc = kind === "empty"
-                ? 4
-                : Math.max((min / maxDayMin) * 100, 5);
-
+              const heightPc = kind === "empty" ? 4 : Math.max((min / maxDayMin) * 100, 5);
               return (
                 <div className="fc-day-col" key={day.key}>
-                  <div className={`fc-day-min ${min > 0 ? "has" : ""}`}>
-                    {min > 0 ? `${min}m` : ""}
-                  </div>
+                  <div className={`fc-day-min ${min > 0 ? "has" : ""}`}>{min > 0 ? `${min}m` : ""}</div>
                   <div className="fc-day-bar-track">
                     <motion.div
                       className={`fc-day-bar-fill ${kind}`}
                       initial={{ height: 0 }}
                       animate={{ height: `${heightPc}%` }}
-                      transition={{
-                        duration: 0.65,
-                        delay: i * 0.04,
-                        ease: [0.34, 1.56, 0.64, 1],
-                      }}
+                      transition={{ duration: 0.65, delay: i * 0.04, ease: [0.34, 1.56, 0.64, 1] }}
                     />
                   </div>
-                  <div className={`fc-day-label ${day.isToday ? "today" : ""}`}>
-                    {day.label}
-                  </div>
+                  <div className={`fc-day-label ${day.isToday ? "today" : ""}`}>{day.label}</div>
                 </div>
               );
             })}
           </div>
 
-          {/* LEGEND */}
           <div className="fc-bar-legend">
             <div className="fc-legend-item"><div className="fc-legend-dot good" /> ≥{DAILY_GOAL_MIN}m</div>
             <div className="fc-legend-item"><div className="fc-legend-dot partial" /> {DAILY_GOAL_MIN / 2}–{DAILY_GOAL_MIN - 1}m</div>
@@ -937,37 +1120,25 @@ const TimerChallanger: React.FC = () => {
             <div className="fc-legend-goal"><div className="fc-legend-dash" /> Goal line</div>
           </div>
 
-          {/* STATS */}
           <div className="fc-stats-grid">
             <div className="fc-stat-box">
               <div className="fc-stat-label">Good Days</div>
-              <div className={`fc-stat-val ${getStatColor(stats.goodDays, 10, 5)}`}>
-                {stats.goodDays}<sup>/15</sup>
-              </div>
+              <div className={`fc-stat-val ${getStatColor(stats.goodDays, 10, 5)}`}>{stats.goodDays}<sup>/15</sup></div>
               <div className="fc-stat-sub">≥{DAILY_GOAL_MIN} min/day</div>
             </div>
-
             <div className="fc-stat-box">
               <div className="fc-stat-label">Partial Days</div>
-              <div className={`fc-stat-val ${getStatColor(15 - stats.badDays - stats.emptyDays, 8, 4)}`}>
-                {stats.badDays}<sup>/15</sup>
-              </div>
+              <div className={`fc-stat-val ${getStatColor(15 - stats.badDays - stats.emptyDays, 8, 4)}`}>{stats.badDays}<sup>/15</sup></div>
               <div className="fc-stat-sub">&lt;{DAILY_GOAL_MIN}m, &gt;0m</div>
             </div>
-
             <div className="fc-stat-box">
               <div className="fc-stat-label">Avg / Day</div>
-              <div className={`fc-stat-val ${getStatColor(stats.avgMin, DAILY_GOAL_MIN, 30)}`}>
-                {stats.avgMin}<sup>m</sup>
-              </div>
+              <div className={`fc-stat-val ${getStatColor(stats.avgMin, DAILY_GOAL_MIN, 30)}`}>{stats.avgMin}<sup>m</sup></div>
               <div className="fc-stat-sub">last 15 days</div>
             </div>
-
             <div className="fc-stat-box">
               <div className="fc-stat-label">Missed Days</div>
-              <div className={`fc-stat-val ${getStatColor(15 - stats.emptyDays, 12, 8)}`}>
-                {stats.emptyDays}<sup>/15</sup>
-              </div>
+              <div className={`fc-stat-val ${getStatColor(15 - stats.emptyDays, 12, 8)}`}>{stats.emptyDays}<sup>/15</sup></div>
               <div className="fc-stat-sub">zero sessions</div>
             </div>
           </div>
@@ -999,12 +1170,7 @@ const TimerChallanger: React.FC = () => {
           <div className="fc-label">Quick Presets</div>
           <div className="fc-presets">
             {PRESETS.map(p => (
-              <button
-                key={p.val}
-                className="fc-pset"
-                onClick={() => startSession(p.val)}
-                disabled={isRunning}
-              >
+              <button key={p.val} className="fc-pset" onClick={() => startSession(p.val)} disabled={isRunning}>
                 {p.label}
               </button>
             ))}
@@ -1012,7 +1178,6 @@ const TimerChallanger: React.FC = () => {
 
           <div className="fc-divider" />
 
-          {/* Ring */}
           <div className="fc-ring-wrap">
             <div className="fc-ring">
               <svg viewBox="0 0 180 180">
@@ -1031,7 +1196,78 @@ const TimerChallanger: React.FC = () => {
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Music/Alert Sound Selector */}
+          <div className="music-selector">
+            <div className="music-header">
+              <div className="music-title">
+                <Music size={12} /> Alarm Sound
+              </div>
+              <div className="flex" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button
+                  onClick={() => saveMutedPreference(!isMuted)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: isMuted ? 'var(--warn)' : 'var(--sub)' }}
+                >
+                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                </button>
+                {!isMuted && (
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={soundVolume}
+                    onChange={(e) => saveVolumePreference(parseFloat(e.target.value))}
+                    style={{ width: '60px', height: '2px' }}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="music-list">
+              {allSounds.map((sound) => (
+                <div
+                  key={sound.id || sound.name}
+                  className={`music-item ${selectedSound === sound.url ? 'active' : ''}`}
+                  onClick={() => saveSoundPreference(sound.url)}
+                >
+                  <div className="music-info">
+                    <span className="music-name">{sound.name}</span>
+                    {selectedSound === sound.url && <span className="music-badge">Active</span>}
+                  </div>
+                  {'type' in sound && sound.type === 'default' ? null : (
+                    <div className="music-actions">
+                      <button
+                        className="music-remove"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeCustomSound(sound.id);
+                        }}
+                      >
+                        <Trash size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <label className="upload-btn">
+              <Upload size={12} /> Upload Custom Sound (MP3/WAV)
+              <input
+                type="file"
+                accept="audio/mp3,audio/wav,audio/mpeg"
+                hidden
+                onChange={(e) => {
+                  if (e.target.files?.[0]) saveCustomSound(e.target.files[0]);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+            {customSounds.length > 0 && (
+              <button className="clear-all-btn" onClick={clearAllCustomSounds}>
+                <Trash size={12} /> Clear All Custom Sounds
+              </button>
+            )}
+          </div>
+
           {isRunning ? (
             <div className="fc-actions fc-row2">
               <button className="fc-btn fc-btn-pause" onClick={() => setIsRunning(false)}>
@@ -1064,14 +1300,14 @@ const TimerChallanger: React.FC = () => {
         <div className="fc-card fc-chart-card">
           <div className="fc-card-hd"><TrendingUp size={13} /> Weekly Output (minutes)</div>
           <div className="fc-chart-wrap">
-            {timers.length > 0
-              ? <Line data={chartData} options={chartOpts} />
-              : (
-                <div className="fc-chart-empty">
-                  <TrendingUp size={34} strokeWidth={1} />
-                  <span>Start a session to see your stats</span>
-                </div>
-              )}
+            {timers.length > 0 ? (
+              <Line data={chartData} options={chartOpts} />
+            ) : (
+              <div className="fc-chart-empty">
+                <TrendingUp size={34} strokeWidth={1} />
+                <span>Start a session to see your stats</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1080,9 +1316,10 @@ const TimerChallanger: React.FC = () => {
           <div className="fc-card-hd"><ListChecks size={13} /> Session Logs : {timers.length}</div>
           <div className="fc-log-list">
             <AnimatePresence>
-              {timers.length === 0
-                ? <div className="fc-logs-empty">No sessions yet. Start focusing!</div>
-                : [...timers].reverse().map(t => (
+              {timers.length === 0 ? (
+                <div className="fc-logs-empty">No sessions yet. Start focusing!</div>
+              ) : (
+                [...timers].reverse().map(t => (
                   <motion.div
                     key={t._id}
                     className="fc-log-item"
@@ -1094,22 +1331,19 @@ const TimerChallanger: React.FC = () => {
                     <div className="fc-log-icon"><Target size={15} /></div>
                     <div className="fc-log-info">
                       <div className="fc-log-title">{t.routineTitle}</div>
-                      <div className="fc-log-meta">
-                        {t.spentMin}m {t.spentSec}s &nbsp;/&nbsp; {t.min}m goal
-                      </div>
+                      <div className="fc-log-meta">{t.spentMin}m {t.spentSec}s / {t.min}m goal</div>
                     </div>
                     <button className="fc-log-del" onClick={() => handleDelete(t._id)}>
                       <Trash2 size={14} />
                     </button>
                   </motion.div>
                 ))
-              }
+              )}
             </AnimatePresence>
           </div>
         </div>
-
       </div>
-      <audio ref={audioRef} src={sound} />
+      <audio ref={audioRef} />
     </div>
   );
 };
