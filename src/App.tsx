@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Loading from './components/Loading'
 import { Toaster } from 'react-hot-toast'
@@ -38,32 +38,32 @@ const DailyPlanner = React.lazy(() => import('./pages/dailyplanner/DailyPlanner'
 
 
 const AppLayout = () => {
-  // const location = useLocation()
+  const location = useLocation()
 
-  // const hideHeaderRoutes = [
-  //   "/dashboard",
-  //   "/createTodo",
-  //   "/managetodo",
-  //   "/profile",
-  //   "/todoEdit",
-  //   "/todoDetails",
-  //   "/analyze",
-  //   "/createProject",
-  //   "/manageproject",
-  //   "/projectanalyzer",
-  //   "/projectdetails",
-  //   "/projectedit",
-  //   "/editfeature",
-  // ];
+  const hideHeaderRoutes = [
+    // "/dashboard",
+    // "/createTodo",
+    // "/managetodo",
+    // "/profile",
+    // "/todoEdit",
+    // "/todoDetails",
+    // "/analyze",
+    // "/createProject",
+    // "/manageproject",
+    // "/projectanalyzer",
+    "/projectdetails",
+    // "/projectedit",
+    // "/editfeature",
+  ];
 
-  // // dashboard route check
-  // const hideHeader = hideHeaderRoutes.some(route =>
-  //   location.pathname.startsWith(route)
-  // );
+  // dashboard route check
+  const hideHeader = hideHeaderRoutes.some(route =>
+    location.pathname.startsWith(route)
+  );
 
   return (
     <>
-      {/* {!hideHeader && <Header />} */}
+      {!hideHeader && <Header />}
       <Header />
       <Suspense fallback={<Loading />}>
         <CommandPalette />
