@@ -47,7 +47,7 @@ const AppLayout = () => {
     // "/profile",
     // "/todoEdit",
     "/todoDetails",
-    // "/analyze",
+    "/analyze",
   ];
 
   // dashboard route check

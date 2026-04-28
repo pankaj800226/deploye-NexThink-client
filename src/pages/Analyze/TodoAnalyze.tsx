@@ -14,6 +14,9 @@ import {
   CartesianGrid
 } from "recharts";
 import { motion } from "framer-motion";
+import { ArrowBack } from "@mui/icons-material";
+import { Button } from "@mui/material";
+import { Link } from "react-router-dom";
 
 type Task = {
   _id: string;
@@ -86,10 +89,26 @@ const Analyze = () => {
         {/* 2. Sleek Header with Date/Time feel */}
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="items-center gap-2 mb-1">
+               <Link to="/">
+                        <Button
+                            startIcon={<ArrowBack />}
+                            sx={{
+                                borderRadius: '10px',
+                                textTransform: 'none',
+                                color: '#4B5563',
+                                '&:hover': {
+                                    backgroundColor: '#F3F4F6'
+                                }
+                            }}
+                        >
+                            Back to Tasks
+                        </Button>
+                    </Link>
               <span className="h-1.5 w-8 bg-indigo-600 rounded-full"></span>
               <span className="text-xs font-bold text-indigo-600 uppercase tracking-[0.2em]">Live Insights</span>
             </div>
+            
             <h1 className="text-4xl font-black text-slate-900 tracking-tight">Overview</h1>
             <p className="text-slate-500 text-base mt-2">Manage your workflow and track task velocity.</p>
           </div>
