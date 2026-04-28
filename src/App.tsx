@@ -64,7 +64,7 @@ const AppLayout = () => {
   return (
     <>
       {!hideHeader && <Header />}
-      <Header />
+      {/* <Header /> */}
       <Suspense fallback={<Loading />}>
         <CommandPalette />
 
