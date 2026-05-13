@@ -496,7 +496,7 @@ const HeaderStyles = () => (
 /* ══════════════════════════════════════════════════ */
 const NAV_LINKS = [
   { to: "/dailyplanner", label: "Daily Planner" },
-  { to: "/timechallaner", label: "Focus Mood" },
+  { to: "/timechallaner", label: "Focus Time" },
   { to: "/habittracker", label: "Habit Tracker" },
   { to: "/about", label: "About" },
   { to: "/profile", label: "Profile" },

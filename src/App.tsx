@@ -7,6 +7,7 @@ import SaveRoute from './protectedRoute/SaveRoute'
 import CommandPalette from './pages/CommandPalette'
 
 
+
 // pages configration
 const Home = React.lazy(() => import('./pages/Home'))
 const Register = React.lazy(() => import('./components/auth/Register'))

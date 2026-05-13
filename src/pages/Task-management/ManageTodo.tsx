@@ -646,7 +646,7 @@ const ManageTodo = () => {
                                                     </Tooltip>
                                                 </div>
                                             </div>
-
+                                            {/* // description */}
                                             {todo.description && (
                                                 <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mt-1 mb-2">
                                                     {todo.description.slice(0, 50)}...

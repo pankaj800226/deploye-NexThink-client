@@ -45,6 +45,7 @@ const DailyPlanner: React.FC = () => {
     else setGreeting("Good Evening");
   }, []);
 
+  // Load planner data from server
   const loadPlanner = useCallback(async () => {
     try {
       const { data } = await axios.get(`${api}/api/dailyplanner/create/planner`, {
@@ -58,6 +59,8 @@ const DailyPlanner: React.FC = () => {
     }
   }, [token]);
 
+
+  // Save planner data to server
   const savePlanner = async (updatedBlocks: Block[]) => {
     try {
       await axios.put(`${api}/api/dailyplanner/update/planner`,
@@ -94,22 +97,53 @@ const DailyPlanner: React.FC = () => {
     const toastId = toast.loading("Preparing PDF...");
 
     try {
-      const canvas = await html2canvas(plannerRef.current, {
-        scale: 2,
+      // Add a temporary class for PDF generation
+      const element = plannerRef.current;
+      const originalOverflow = element.style.overflow;
+      element.style.overflow = 'visible';
+
+      // Wait a bit for any pending changes
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(element, {
+        scale: 3,
         useCORS: true,
         backgroundColor: "#FFFFFF",
+        logging: false,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        onclone: (clonedDoc, element) => {
+          // Ensure all styles are applied in the cloned document
+          const clonedElement = clonedDoc.body.querySelector('.planner-pdf-container');
+          if (clonedElement) {
+            // Fix any Tailwind styles that might not render correctly
+            const checkboxes = clonedElement.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox: any) => {
+              if (checkbox.checked) {
+                const parent = checkbox.parentElement;
+                if (parent) {
+                  parent.style.backgroundColor = '#10B981';
+                  parent.style.borderColor = '#10B981';
+                }
+              }
+            });
+          }
+        }
       });
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`Planner-${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success("Downloaded successfully!", { id: toastId });
+
+      // Restore original overflow
+      element.style.overflow = originalOverflow;
     } catch (error) {
+      console.error("PDF Error:", error);
       toast.error("Failed to generate PDF", { id: toastId });
     } finally {
       setIsExporting(false);
@@ -134,634 +168,64 @@ const DailyPlanner: React.FC = () => {
   if (error) return <ApiError error={error} />;
 
   return (
-    <div className="daily-planner">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        .daily-planner {
-          min-height: 100vh;
-          font-family: 'Inter', sans-serif;
-          position: relative;
-        }
-
-        /* Decorative Background Elements */
-        .daily-planner::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 400px;
-      
-          pointer-events: none;
-        }
-
-        /* Cover Bar */
-        .planner-cover {
-          height: 4px;
-          background: linear-gradient(90deg, #4F46E5, #7C3AED, #EC4899, #F59E0B);
-          position: fixed;
-          top: 60px;
-          left: 0;
-          right: 0;
-          z-index: 10;
-        }
-
-        /* Container */
-        .planner-container {
-          max-width: 1000px;
-          margin: 0 auto;
-          padding: 100px 24px 60px;
-          position: relative;
-          z-index: 1;
-        }
-
-        /* Header Styles */
-        .planner-header {
-          margin-bottom: 28px;
-          background: white;
-          border-radius: 28px;
-          padding: 28px 32px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-          border: 1px solid rgba(229, 231, 235, 0.8);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .planner-header:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-        }
-
-        .title-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          flex-wrap: wrap;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .title-left h1 {
-          font-size: 32px;
-          font-weight: 800;
-          background: linear-gradient(135deg, #1F2937, #4F46E5);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          margin: 0;
-          letter-spacing: -0.5px;
-        }
-
-        .greeting-text {
-          font-size: 14px;
-          color: #6B7280;
-          margin-top: 6px;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .greeting-text::before {
-          content: '☀️';
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-
-        .download-btn, .delete-all-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 10px 20px;
-          border-radius: 14px;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.25s ease;
-          border: none;
-          font-family: 'Inter', sans-serif;
-        }
-
-        .download-btn {
-          background: linear-gradient(135deg, #4F46E5, #7C3AED);
-          color: white;
-          box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
-        }
-
-        .download-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
-        }
-
-        .delete-all-btn {
-          background: white;
-          color: #EF4444;
-          border: 1px solid #FEE2E2;
-        }
-
-        .delete-all-btn:hover {
-          background: #FEF2F2;
-          border-color: #FCA5A5;
-          transform: translateY(-2px);
-        }
-
-        /* Meta Row */
-        .meta-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 16px;
-          padding-top: 20px;
-          border-top: 1px solid #F3F4F6;
-        }
-
-        .date-badge {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
-          background: #F9FAFB;
-          border-radius: 14px;
-          font-size: 13px;
-          color: #4B5563;
-          font-weight: 500;
-        }
-
-        .progress-section {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .progress-stats {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .progress-bar-container {
-          flex: 1;
-          height: 8px;
-          background: #F3F4F6;
-          border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .progress-bar-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #10B981, #34D399);
-          border-radius: 10px;
-          transition: width 0.4s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .progress-bar-fill::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-          animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-
-        .progress-text {
-          font-size: 13px;
-          font-weight: 700;
-          color: #10B981;
-          min-width: 50px;
-        }
-
-        .motivation-text {
-          font-size: 12px;
-          color: #6B7280;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 12px;
-          background: #FEF3C7;
-          border-radius: 20px;
-        }
-
-        /* Toolbar */
-        .notion-toolbar {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          flex-wrap: wrap;
-          padding: 16px 24px;
-          background: white;
-          border: 1px solid #E5E7EB;
-          border-radius: 24px;
-          margin-bottom: 24px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .add-label {
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          color: #9CA3AF;
-          background: #F9FAFB;
-          padding: 4px 12px;
-          border-radius: 20px;
-        }
-
-        .picker-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 18px;
-          background: white;
-          border: 1px solid #E5E7EB;
-          border-radius: 14px;
-          font-size: 13px;
-          font-weight: 500;
-          color: #4B5563;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .picker-btn:hover {
-          background: #F9FAFB;
-          border-color: #4F46E5;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Editor */
-        .planner-editor {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .empty-hint {
-          text-align: center;
-          padding: 70px 20px;
-          background: white;
-          border-radius: 24px;
-          border: 2px dashed #E5E7EB;
-          color: #9CA3AF;
-        }
-
-        .empty-icon {
-          margin-bottom: 16px;
-          opacity: 0.5;
-        }
-
-        .empty-hint p {
-          font-size: 14px;
-        }
-
-        .empty-hint small {
-          font-size: 12px;
-          color: #D1D5DB;
-        }
-
-        /* Block Row */
-        .block-row-group {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 12px;
-          background: white;
-          border: 1px solid #E5E7EB;
-          border-radius: 20px;
-          transition: all 0.2s ease;
-        }
-
-        .block-row-group:hover {
-          border-color: #C7D2FE;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-        }
-
-        .side-controls {
-          display: flex;
-          gap: 6px;
-          padding-top: 4px;
-        }
-
-        .control-btn {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          background: #F9FAFB;
-          border: 1px solid #E5E7EB;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          color: #9CA3AF;
-        }
-
-        .control-btn:hover {
-          background: #FEF2F2;
-          border-color: #FCA5A5;
-          color: #EF4444;
-        }
-
-        .block-content {
-          flex: 1;
-          min-width: 0;
-        }
-
-        /* Heading Block */
-        .heading-block {
-          font-size: 22px;
-          font-weight: 700;
-          color: #1F2937;
-          padding: 8px 12px;
-          border: none;
-          outline: none;
-          width: 100%;
-          background: transparent;
-          border-radius: 12px;
-          transition: background 0.2s;
-        }
-
-        .heading-block:focus {
-          background: #F9FAFB;
-        }
-
-        .heading-block:empty::before {
-          content: attr(data-placeholder);
-          color: #D1D5DB;
-        }
-
-        /* Todo Item */
-        .todo-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 4px 0;
-        }
-
-        .checkbox-container {
-          position: relative;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
-
-        .checkbox-container input {
-          position: absolute;
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-
-        .checkmark {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 24px;
-          height: 24px;
-          border: 2px solid #D1D5DB;
-          border-radius: 8px;
-          background: white;
-          transition: all 0.2s ease;
-        }
-
-        .checkbox-container:hover .checkmark {
-          border-color: #4F46E5;
-          background: #EEF2FF;
-        }
-
-        .checkbox-container input:checked + .checkmark {
-          background: #10B981;
-          border-color: #10B981;
-        }
-
-        .checkbox-container input:checked + .checkmark::after {
-          content: "✓";
-          color: white;
-          font-size: 14px;
-          font-weight: bold;
-        }
-
-        .todo-text {
-          flex: 1;
-          font-size: 15px;
-          color: #374151;
-          padding: 6px 10px;
-          border: none;
-          outline: none;
-          background: transparent;
-          border-radius: 8px;
-          transition: background 0.2s;
-        }
-
-        .todo-text.done {
-          text-decoration: line-through;
-          color: #9CA3AF;
-        }
-
-        .todo-text:focus {
-          background: #F9FAFB;
-        }
-
-        .todo-text:empty::before {
-          content: attr(data-placeholder);
-          color: #D1D5DB;
-        }
-
-        /* Note Block */
-        .note-block {
-          font-size: 15px;
-          color: #4B5563;
-          line-height: 1.6;
-          padding: 8px 12px;
-          border: none;
-          outline: none;
-          width: 100%;
-          background: transparent;
-          border-radius: 12px;
-          transition: background 0.2s;
-        }
-
-        .note-block:focus {
-          background: #F9FAFB;
-        }
-
-        .note-block:empty::before {
-          content: attr(data-placeholder);
-          color: #D1D5DB;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-          background: #F3F4F6;
-          border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-          background: #D1D5DB;
-          border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-          background: #9CA3AF;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .planner-container {
-            padding: 80px 16px 40px;
-          }
-
-          .planner-header {
-            padding: 20px;
-          }
-
-          .title-left h1 {
-            font-size: 26px;
-          }
-
-          .header-actions {
-            width: 100%;
-          }
-
-          .download-btn, .delete-all-btn {
-            flex: 1;
-            justify-content: center;
-          }
-
-          .meta-row {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .progress-stats {
-            flex-direction: column;
-          }
-
-          .notion-toolbar {
-            padding: 14px 18px;
-          }
-
-          .picker-btn {
-            padding: 6px 14px;
-            font-size: 12px;
-          }
-
-          .heading-block {
-            font-size: 18px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .planner-container {
-            padding: 70px 12px 30px;
-          }
-
-          .planner-header {
-            padding: 16px;
-          }
-
-          .title-left h1 {
-            font-size: 22px;
-          }
-
-          .greeting-text {
-            font-size: 12px;
-          }
-
-          .notion-toolbar {
-            gap: 8px;
-          }
-
-          .picker-btn {
-            padding: 5px 10px;
-            font-size: 11px;
-          }
-
-          .add-label {
-            font-size: 10px;
-          }
-
-          .block-row-group {
-            padding: 8px;
-          }
-
-          .control-btn {
-            width: 28px;
-            height: 28px;
-          }
-
-          .heading-block {
-            font-size: 16px;
-            padding: 6px 8px;
-          }
-
-          .todo-text, .note-block {
-            font-size: 13px;
-          }
-
-          .checkmark {
-            width: 20px;
-            height: 20px;
-          }
-        }
-      `}</style>
-
-      <div className="planner-cover" />
-
-      <div className="planner-container" ref={plannerRef}>
-        <header className="planner-header">
-          <div className="title-row">
-            <div className="title-left">
-              <h1>📋 Daily Planner</h1>
-              <div className="greeting-text">{greeting}, let's plan your day!</div>
+    <div className="min-h-screen font-['Inter',sans-serif] relative bg-gradient-to-br from-gray-50 via-white to-gray-50">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-br from-indigo-50/50 via-purple-50/30 to-pink-50/50 pointer-events-none" />
+
+      {/* Cover Bar */}
+      <div className="h-1 fixed top-[60px] left-0 right-0 z-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500" />
+
+      {/* Container */}
+      <div className="planner-pdf-container max-w-[1000px] mx-auto px-4 md:px-6 py-[100px] pb-16 relative z-10" ref={plannerRef}>
+        <header className="mb-7 bg-white rounded-[28px] p-5 md:p-8 shadow-md border border-gray-100/80 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+          <div className="flex justify-between items-center flex-wrap gap-5 mb-5">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-gray-800 to-indigo-600 bg-clip-text text-transparent tracking-tight">
+                📋 Daily Planner
+              </h1>
+              <div className="text-sm text-gray-500 mt-1.5 flex items-center gap-1.5">
+                <span>☀️</span>
+                <span>{greeting}, let's plan your day!</span>
+              </div>
             </div>
-            <div className="header-actions">
-              <button className="download-btn" onClick={downloadPDF} disabled={isExporting}>
+            <div className="flex gap-3 flex-wrap">
+              <button
+                className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50"
+                onClick={downloadPDF}
+                disabled={isExporting}
+              >
                 <Download size={16} />
                 {isExporting ? "Exporting..." : "Download PDF"}
               </button>
-              <button className="delete-all-btn" onClick={() => setBlocks([])}>
+              <button
+                className="flex items-center gap-2 px-4 md:px-5 py-2.5 rounded-xl text-sm font-semibold bg-white text-red-500 border border-red-100 transition-all duration-200 hover:bg-red-50 hover:border-red-300 hover:-translate-y-0.5"
+                onClick={() => setBlocks([])}
+              >
                 <Trash2 size={16} />
                 Clear All
               </button>
             </div>
           </div>
 
-          <div className="meta-row">
-            <div className="date-badge">
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-5 border-t border-gray-100">
+            <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl text-sm text-gray-600 font-medium">
               <Calendar size={14} />
               <span>{today}</span>
             </div>
-            <div className="progress-section">
-              <div className="progress-stats">
-                <div className="progress-bar-container">
-                  <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }} />
+            <div className="flex-1 min-w-[200px]">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-300 relative overflow-hidden"
+                    style={{ width: `${progressPercent}%` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_infinite]" />
+                  </div>
                 </div>
-                <span className="progress-text">
+                <span className="text-sm font-bold text-emerald-500 min-w-[50px]">
                   {completedTasks}/{totalTasks} Tasks
                 </span>
-                <div className="motivation-text">
+                <div className="text-xs text-gray-500 flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-full">
                   <Sparkles size={12} />
                   <span>{getMotivationMessage()}</span>
                 </div>
@@ -770,58 +234,83 @@ const DailyPlanner: React.FC = () => {
           </div>
         </header>
 
-        <nav className="notion-toolbar" data-html2canvas-ignore>
-          <span className="add-label">Quick Add</span>
-          <button className="picker-btn" onClick={() => addBlock("heading")}>
+        <nav className="flex items-center gap-2.5 flex-wrap p-4 md:p-6 bg-white border border-gray-200 rounded-2xl mb-6 shadow-sm" data-html2canvas-ignore>
+          <span className="text-[11px] font-bold uppercase tracking-wide text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
+            Quick Add
+          </span>
+          <button
+            className="flex items-center gap-2 px-4 md:px-5 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-indigo-600 hover:-translate-y-0.5 hover:shadow-md"
+            onClick={() => addBlock("heading")}
+          >
             <Heading size={14} /> Heading
           </button>
-          <button className="picker-btn" onClick={() => addBlock("check")}>
+          <button
+            className="flex items-center gap-2 px-4 md:px-5 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-indigo-600 hover:-translate-y-0.5 hover:shadow-md"
+            onClick={() => addBlock("check")}
+          >
             <CheckSquare size={14} /> To-do
           </button>
-          <button className="picker-btn" onClick={() => addBlock("note")}>
+          <button
+            className="flex items-center gap-2 px-4 md:px-5 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:border-indigo-600 hover:-translate-y-0.5 hover:shadow-md"
+            onClick={() => addBlock("note")}
+          >
             <Type size={14} /> Text
           </button>
         </nav>
 
-        <main className="planner-editor">
+        <main className="flex flex-col gap-3">
           {blocks.length === 0 && (
-            <div className="empty-hint">
-              <div className="empty-icon">
+            <div className="text-center py-[70px] px-5 bg-white rounded-2xl border-2 border-dashed border-gray-200 text-gray-400">
+              <div className="mb-4 opacity-50">
                 <Sparkles size={48} />
               </div>
-              <p>✨ Start by adding a block above ✨</p>
-              <small>Add headings, tasks, or notes to organize your day</small>
+              <p className="text-sm">✨ Start by adding a block above ✨</p>
+              <small className="text-xs text-gray-300">Add headings, tasks, or notes to organize your day</small>
             </div>
           )}
 
           {blocks.map((block) => (
-            <div key={block.id} className="block-row-group">
-              <div className="side-controls" data-html2canvas-ignore>
-                <button className="control-btn" onClick={() => setBlocks(blocks.filter(b => b.id !== block.id))}>
+            <div key={block.id} className="flex items-start gap-3 p-3 bg-white border border-gray-200 rounded-xl transition-all duration-200 hover:border-indigo-200 hover:shadow-md">
+              <div className="flex gap-1.5 pt-1" data-html2canvas-ignore>
+                <button
+                  className="flex items-center justify-center w-8 h-8 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-200 hover:bg-red-50 hover:border-red-300 hover:text-red-500 text-gray-400"
+                  onClick={() => setBlocks(blocks.filter(b => b.id !== block.id))}
+                >
                   <Trash2 size={14} />
                 </button>
               </div>
 
-              <div className="block-content">
+              <div className="flex-1 min-w-0">
                 {block.type === "heading" ? (
                   <div
                     contentEditable
                     suppressContentEditableWarning
-                    className="heading-block"
+                    className="text-xl md:text-2xl font-bold text-gray-800 px-3 py-2 outline-none rounded-xl transition-all duration-200 focus:bg-gray-50 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300"
                     data-placeholder="Heading 1"
                     onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
                     dangerouslySetInnerHTML={{ __html: block.text || "" }}
                   />
                 ) : block.type === "check" ? (
-                  <div className="todo-item">
-                    <label className="checkbox-container">
-                      <input type="checkbox" checked={block.done} onChange={() => toggleTodo(block.id)} />
-                      <span className="checkmark"></span>
+                  <div className="flex items-center gap-3 py-1">
+                    <label className="relative cursor-pointer shrink-0 group">
+                      <input
+                        type="checkbox"
+                        checked={block.done}
+                        onChange={() => toggleTodo(block.id)}
+                        className="peer absolute opacity-0 w-0 h-0"
+                      />
+                      <div className="flex items-center justify-center w-6 h-6 border-2 rounded-lg transition-all duration-200 border-gray-300 bg-white peer-checked:bg-emerald-500 peer-checked:border-emerald-500 group-hover:border-indigo-600">
+                        {block.done && (
+                          <svg className="w-4 h-4 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
                     </label>
                     <div
                       contentEditable
                       suppressContentEditableWarning
-                      className={`todo-text ${block.done ? 'done' : ''}`}
+                      className={`flex-1 text-sm md:text-base text-gray-700 px-2.5 py-1.5 outline-none rounded-lg transition-all duration-200 focus:bg-gray-50 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300 ${block.done ? 'line-through text-gray-400' : ''}`}
                       data-placeholder="Write a task..."
                       onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
                       dangerouslySetInnerHTML={{ __html: block.text || "" }}
@@ -831,7 +320,7 @@ const DailyPlanner: React.FC = () => {
                   <div
                     contentEditable
                     suppressContentEditableWarning
-                    className="note-block"
+                    className="text-sm md:text-base text-gray-600 leading-relaxed px-3 py-2 outline-none rounded-xl transition-all duration-200 focus:bg-gray-50 empty:before:content-[attr(data-placeholder)] empty:before:text-gray-300"
                     data-placeholder="Write your notes here..."
                     onBlur={(e) => updateText(block.id, e.currentTarget.innerText)}
                     dangerouslySetInnerHTML={{ __html: block.text || "" }}
@@ -842,6 +331,40 @@ const DailyPlanner: React.FC = () => {
           ))}
         </main>
       </div>
+
+      {/* Custom animations and styles */}
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        /* Ensure proper checkbox rendering in PDF */
+        .planner-pdf-container input[type="checkbox"]:checked + div {
+          background-color: #10B981 !important;
+          border-color: #10B981 !important;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+          background: #F3F4F6;
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+          background: #D1D5DB;
+          border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+          background: #9CA3AF;
+        }
+      `}</style>
     </div>
   );
 };

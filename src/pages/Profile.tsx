@@ -494,21 +494,7 @@ const Profile = () => {
             </p>
 
             {/* Stats Section */}
-            <div className="stats_section">
-              <div className="stat_item">
-                <div className="stat_value">{profile?.stats?.totalTasks || 0}</div>
-                <div className="stat_label">Total Tasks</div>
-              </div>
-              <div className="stat_item">
-                <div className="stat_value">{profile?.stats?.completedTasks || 0}</div>
-                <div className="stat_label">Completed</div>
-              </div>
-              <div className="stat_item">
-                <div className="stat_value">{profile?.stats?.streak || 0}</div>
-                <div className="stat_label">Day Streak</div>
-              </div>
-            </div>
-            
+       
             <button 
               className="edit_btn" 
               onClick={() => setEditDialogOpen(true)}

@@ -8,21 +8,32 @@ import ApiError from "../../components/ApiError";
 import Loading from "../../components/Loading";
 import { CheckCircle, Target } from "lucide-react";
 
+// ============================================
+// TYPE DEFINITIONS
+// ============================================
+
+// Individual day data structure
 type Day = { checked: boolean; date: string };
+// Week data structure (7 days)
 type Week = { weekNo: number; days: Day[] };
+// Task/Habit data structure
 type Task = { _id: string; title: string; weeks: Week[] };
 
-// Past date + unchecked = missed
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+// ✅ Check if a day is missed (past date AND not checked)
 const isMissed = (date: string, checked: boolean): boolean => {
-    if (checked) return false;
+    if (checked) return false; // Already checked, so not missed
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dayDate = new Date(date);
     dayDate.setHours(0, 0, 0, 0);
-    return dayDate < today;
+    return dayDate < today; // Returns true if date is in the past
 };
 
-// Aaj ka din?
+// ✅ Check if a day is today's date
 const isToday = (date: string): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -31,7 +42,7 @@ const isToday = (date: string): boolean => {
     return dayDate.getTime() === today.getTime();
 };
 
-// Future din?
+// ✅ Check if a day is in the future (can't check future days)
 const isFuture = (date: string): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -40,13 +51,17 @@ const isFuture = (date: string): boolean => {
     return dayDate > today;
 };
 
-// ✅ Kya yeh week ke saare din "done" hain? (checked ya missed)
+// ✅ Check if all days in a week are completed (checked OR missed)
 const isWeekAllDone = (week: Week): boolean => {
     return week.days.every(day => {
-        if (day.checked) return true;
-        return isMissed(day.date, day.checked);
+        if (day.checked) return true; // Day is checked
+        return isMissed(day.date, day.checked); // Day is missed (past unchecked)
     });
 };
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
 const CreateHabitTracker = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -56,13 +71,18 @@ const CreateHabitTracker = () => {
     const [error, setError] = useState("");
     const [btnLoader, setBtnLoader] = useState(false);
 
-    // ✅ Page load pe missed weeks trigger karo
+    // ============================================
+    // AUTO-TRIGGER NEXT WEEK WHEN CURRENT WEEK IS COMPLETE
+    // ============================================
+
+    // ✅ Automatically trigger next week when all days in current week are done
     const triggerMissedWeeks = async (fetchedTasks: Task[]) => {
         for (const task of fetchedTasks) {
             for (const week of task.weeks) {
-                const allDone = isWeekAllDone(week);
+                const allDone = isWeekAllDone(week);  // Check if week complete
                 const nextWeekExists = task.weeks.some(w => w.weekNo === week.weekNo + 1);
 
+                // If week complete AND next week doesn't exist, create next week
                 if (allDone && !nextWeekExists) {
                     try {
                         const res = await axios.put(
@@ -75,6 +95,7 @@ const CreateHabitTracker = () => {
                             },
                             { headers: { Authorization: `Bearer ${token}` } }
                         );
+                        // Update the task with new week data
                         setTasks(prev =>
                             prev.map(t => (t._id === task._id ? res.data.task : t))
                         );
@@ -86,16 +107,21 @@ const CreateHabitTracker = () => {
         }
     };
 
-    // Fetch schedulers on component mount
+    // ============================================
+    // FETCH ALL HABITS ON COMPONENT MOUNT
+    // ============================================
+
     useEffect(() => {
         const fetchShedular = async () => {
             try {
                 setLoader(true);
+                // Fetch all habits from API
                 const res = await axios.get(`${api}/api/shedular/get/shedular`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const fetchedTasks = res.data.schedulers;
                 setTasks(fetchedTasks);
+                // Check and auto-create next weeks if needed
                 await triggerMissedWeeks(fetchedTasks);
             } catch (error) {
                 console.log(error);
@@ -107,7 +133,10 @@ const CreateHabitTracker = () => {
         fetchShedular();
     }, [token]);
 
-    // Motivation message based on progress
+    // ============================================
+    // MOTIVATION MESSAGES BASED ON PROGRESS
+    // ============================================
+
     const getMotivation = (percent: number) => {
         if (percent === 0) return "Every journey starts with a single check! 🌱";
         if (percent < 30) return "You're getting started, keep it up! 💪";
@@ -116,7 +145,10 @@ const CreateHabitTracker = () => {
         return "Masterpiece! You crushed it this week! 🏆✨";
     };
 
-    // Get achievement badge
+    // ============================================
+    // ACHIEVEMENT BADGES BASED ON PROGRESS
+    // ============================================
+
     const getAchievementBadge = (percent: number) => {
         if (percent === 100) return { icon: "👑", text: "Perfect Week!", color: "#fbbf24" };
         if (percent >= 80) return { icon: "🔥", text: "On Fire!", color: "#f97316" };
@@ -125,18 +157,30 @@ const CreateHabitTracker = () => {
         return { icon: "🎯", text: "Keep Going!", color: "#6b7280" };
     };
 
-    // Task progress calculate karne ka function
+    // ============================================
+    // CALCULATE OVERALL PROGRESS FOR A TASK
+    // ============================================
+
     const calculateTaskProgress = (task: Task) => {
+        // Flatten all days from all weeks
         const allDays = task.weeks.flatMap(w => w.days);
+        // Count checked days
         const checked = allDays.filter(d => d.checked).length;
+        // Calculate percentage
         return allDays.length > 0 ? Math.round((checked / allDays.length) * 100) : 0;
     };
 
-    // Task add 
+    // ============================================
+    // ADD NEW HABIT/TASK
+    // ============================================
+
     const handleAddTask = async () => {
-        if (!input.trim()) return;
+        if (!input.trim()) return; // Don't add empty tasks
+
         setBtnLoader(true);
         const startDate = new Date();
+
+        // Create 7 days starting from today
         const daysArray: Day[] = Array.from({ length: 7 }).map((_, i) => {
             const d = new Date(startDate);
             d.setDate(d.getDate() + i);
@@ -149,12 +193,13 @@ const CreateHabitTracker = () => {
         };
 
         try {
+            // API call to create new habit
             const res = await axios.post(`${api}/api/shedular/create/shedular`, newTask, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             toast.success("Scheduler created 🎉");
             setTasks(prev => [...prev, res.data.task]);
-            setInput("");
+            setInput(""); // Clear input field
         } catch (error) {
             console.log(error);
             toast.error("Error creating task");
@@ -163,10 +208,15 @@ const CreateHabitTracker = () => {
         }
     };
 
-    // delete task function
+    // ============================================
+    // DELETE HABIT/TASK
+    // ============================================
+
     const handleDelete = async (id: string) => {
         try {
+            // API call to delete habit
             await axios.delete(`${api}/api/shedular/delete/shedular/${id}`);
+            // Remove from local state
             setTasks(prev => prev.filter(s => s._id !== id));
             toast.success("Habit Deleted");
         } catch (error) {
@@ -175,14 +225,19 @@ const CreateHabitTracker = () => {
         }
     };
 
-    // checkbox toggle function
+    // ============================================
+    // TOGGLE CHECKBOX FOR A SPECIFIC DAY
+    // ============================================
+
     const handleCheckbox = async (taskId: string, weekNo: number, dayIndex: number, checked: boolean) => {
         try {
+            // API call to update day status
             const res = await axios.put(
                 `${api}/api/shedular/check`,
                 { taskId, weekNo, dayIndex, checked },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+            // Update local state with response
             setTasks(prev => prev.map(task => (task._id === taskId ? res.data.task : task)));
             toast.success(checked ? "Great job! ✅" : "Task unchecked");
         } catch {
@@ -190,599 +245,38 @@ const CreateHabitTracker = () => {
         }
     };
 
+    // ============================================
+    // RENDER LOADING AND ERROR STATES
+    // ============================================
+
     if (error) return <ApiError error={error} />;
     if (loader) return <Loading />;
 
+    // ============================================
+    // MAIN RENDER
+    // ============================================
+
     return (
-        <div className="habit-container">
-            <style>{`
-                .habit-container {
-                    min-height: 100vh;
-                    background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
-                    padding: 20px;
-                    font-family: 'Inter', sans-serif;
-                }
-
-                .habit-content {
-                    max-width: 1400px;
-                    margin: 0 auto;
-                }
-
-                /* Header Styles */
-                .habit-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 30px;
-                    flex-wrap: wrap;
-                    gap: 15px;
-                }
-
-                .habit-header h1 {
-                    font-size: 28px;
-                    font-weight: 800;
-                    background: linear-gradient(135deg, #1F2937, #4F46E5);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    margin: 0;
-                }
-
-                .habit-header p {
-                    color: #6B7280;
-                    margin-top: 5px;
-                    font-size: 14px;
-                }
-
-                /* Input Wrapper */
-                .habit-input-wrapper {
-                    display: flex;
-                    gap: 10px;
-                    background: white;
-                    padding: 4px 4px 4px 16px;
-                    border-radius: 50px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                    transition: all 0.3s ease;
-                    border: 2px solid transparent;
-                }
-
-                .habit-input-wrapper:hover,
-                .habit-input-wrapper:focus-within {
-                    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
-                    border-color: #4F46E5;
-                }
-
-                .habit-input-wrapper input {
-                    border: none;
-                    outline: none;
-                    width: 220px;
-                    font-size: 14px;
-                    background: transparent;
-                    color: #1F2937;
-                }
-
-                .habit-input-wrapper input::placeholder {
-                    color: #9CA3AF;
-                }
-
-                .add-btn {
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 50%;
-                    border: none;
-                    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-                    color: white;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    transition: all 0.3s ease;
-                }
-
-                .add-btn:hover {
-                    transform: scale(1.05);
-                    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-                }
-
-                /* Grid Layout */
-                .habit-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-                    gap: 20px;
-                }
-
-                /* Card Styles */
-                .habit-card {
-                    background: white;
-                    border-radius: 20px;
-                    padding: 20px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-                    border: 1px solid #E5E7EB;
-                    transition: all 0.3s ease;
-                    overflow: hidden;
-                }
-
-                .habit-card:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
-                    border-color: #C7D2FE;
-                }
-
-                /* Card Header */
-                .card-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    margin-bottom: 16px;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                }
-
-                .title-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    flex-wrap: wrap;
-                }
-
-                .title-group h3 {
-                    margin: 0;
-                    font-size: 16px;
-                    font-weight: 700;
-                    color: #1F2937;
-                    word-break: break-word;
-                }
-
-                .progress-pill {
-                    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-                    color: white;
-                    padding: 3px 10px;
-                    border-radius: 20px;
-                    font-size: 11px;
-                    font-weight: 600;
-                    white-space: nowrap;
-                }
-
-                .delete-icon-btn {
-                    background: transparent;
-                    border: none;
-                    color: #9CA3AF;
-                    cursor: pointer;
-                    padding: 6px;
-                    border-radius: 8px;
-                    transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .delete-icon-btn:hover {
-                    color: #EF4444;
-                    background: rgba(239, 68, 68, 0.1);
-                }
-
-                /* Scroll Area - Fix for overflow */
-                .grid-scroll-area {
-                    overflow-x: auto;
-                    overflow-y: visible;
-                    margin: 0 -8px;
-                    padding: 0 8px;
-                    -webkit-overflow-scrolling: touch;
-                }
-
-                /* Hide scrollbar for cleaner look */
-                .grid-scroll-area::-webkit-scrollbar {
-                    height: 4px;
-                }
-
-                .grid-scroll-area::-webkit-scrollbar-track {
-                    background: #F3F4F6;
-                    border-radius: 10px;
-                }
-
-                .grid-scroll-area::-webkit-scrollbar-thumb {
-                    background: #C7D2FE;
-                    border-radius: 10px;
-                }
-
-                .grid-scroll-area::-webkit-scrollbar-thumb:hover {
-                    background: #4F46E5;
-                }
-
-                /* Table Styles */
-                .habit-table {
-                    width: 100%;
-                    min-width: 500px;
-                    border-collapse: separate;
-                    border-spacing: 6px 3px;
-                }
-
-                .habit-table th {
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #6B7280;
-                    text-align: center;
-                    padding-bottom: 6px;
-                }
-
-                .week-label {
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #4F46E5;
-                    text-align: center;
-                    white-space: nowrap;
-                }
-
-                .current-day {
-                    background: rgba(79, 70, 229, 0.08);
-                    border-radius: 10px;
-                }
-
-                /* Cell Wrapper */
-                .cell-wrapper {
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    min-width: 40px;
-                    min-height: 40px;
-                }
-
-                .cell-wrapper.is-future {
-                    opacity: 0.3;
-                    pointer-events: none;
-                }
-
-                /* Checkbox Custom */
-                .checkbox-custom {
-                    cursor: pointer;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .checkbox-custom input {
-                    display: none;
-                }
-
-                .check-ui {
-                    font-size: 24px;
-                    transition: all 0.2s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .checkbox-custom:hover .check-ui {
-                    transform: scale(1.1);
-                }
-
-                .icon-done {
-                    color: #10B981;
-                    filter: drop-shadow(0 2px 4px rgba(16, 185, 129, 0.3));
-                }
-
-                .icon-empty {
-                    color: #D1D5DB;
-                }
-
-                /* Missed Indicator - Centered */
-                .missed-indicator {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 18px;
-                    height: 18px;
-                    background: #EF4444;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeInScale 0.3s ease-out;
-                    box-shadow: 0 0 0 2px white, 0 2px 4px rgba(0,0,0,0.1);
-                }
-
-                .missed-indicator::before {
-                    content: '✕';
-                    color: white;
-                    font-size: 10px;
-                    font-weight: bold;
-                }
-
-                @keyframes fadeInScale {
-                    from {
-                        opacity: 0;
-                        transform: translate(-50%, -50%) scale(0);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translate(-50%, -50%) scale(1);
-                    }
-                }
-
-                /* Card Footer */
-                .card-footer {
-                    margin-top: 16px;
-                    padding-top: 12px;
-                    border-top: 1px solid #E5E7EB;
-                }
-
-                .footer-content {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                }
-
-                .motivation-text {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 12px;
-                    color: #6B7280;
-                }
-
-                .stats-badges {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                }
-
-                .stat-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    font-size: 12px;
-                }
-
-                .stat-count {
-                    font-weight: 600;
-                    color: #1F2937;
-                }
-
-                .badge-text {
-                    font-size: 11px;
-                    font-weight: 600;
-                }
-
-                /* Empty State */
-                .empty-state {
-                    text-align: center;
-                    padding: 50px 20px;
-                    background: white;
-                    border-radius: 20px;
-                    margin-top: 30px;
-                    border: 1px solid #E5E7EB;
-                }
-
-                /* ========== RESPONSIVE STYLES ========== */
-                
-                /* Tablet (768px - 1024px) */
-                @media (max-width: 1024px) {
-                    .habit-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-                        gap: 16px;
-                    }
-                }
-
-                /* Mobile Large (600px - 768px) */
-                @media (max-width: 768px) {
-                    .habit-container {
-                        padding: 16px;
-                    }
-                    
-                    .habit-header {
-                        flex-direction: column;
-                        align-items: stretch;
-                        margin-bottom: 20px;
-                    }
-                    
-                    .habit-header h1 {
-                        font-size: 24px;
-                    }
-                    
-                    .habit-header p {
-                        font-size: 13px;
-                    }
-                    
-                    .habit-input-wrapper {
-                        width: 100%;
-                    }
-                    
-                    .habit-input-wrapper input {
-                        width: 100%;
-                        flex: 1;
-                    }
-                    
-                    .habit-grid {
-                        grid-template-columns: 1fr;
-                        gap: 16px;
-                    }
-                    
-                    .habit-card {
-                        padding: 16px;
-                    }
-                    
-                    .title-group h3 {
-                        font-size: 15px;
-                    }
-                    
-                    .progress-pill {
-                        font-size: 10px;
-                        padding: 2px 8px;
-                    }
-                    
-                    .habit-table {
-                        min-width: 450px;
-                        border-spacing: 4px 2px;
-                    }
-                    
-                    .cell-wrapper {
-                        min-width: 36px;
-                        min-height: 36px;
-                    }
-                    
-                    .check-ui {
-                        font-size: 20px;
-                    }
-                    
-                    .missed-indicator {
-                        width: 16px;
-                        height: 16px;
-                    }
-                    
-                    .missed-indicator::before {
-                        font-size: 9px;
-                    }
-                    
-                    .footer-content {
-                        flex-direction: column;
-                        align-items: flex-start;
-                    }
-                    
-                    .stats-badges {
-                        width: 100%;
-                        justify-content: space-between;
-                    }
-                }
-
-                /* Mobile Small (480px and below) */
-                @media (max-width: 480px) {
-                    .habit-container {
-                        padding: 12px;
-                    }
-                    
-                    .habit-header h1 {
-                        font-size: 20px;
-                    }
-                    
-                    .habit-card {
-                        padding: 14px;
-                    }
-                    
-                    .title-group {
-                        gap: 8px;
-                    }
-                    
-                    .title-group h3 {
-                        font-size: 14px;
-                    }
-                    
-                    .progress-pill {
-                        font-size: 9px;
-                        padding: 2px 6px;
-                    }
-                    
-                    .delete-icon-btn {
-                        padding: 4px;
-                    }
-                    
-                    .habit-table {
-                        min-width: 380px;
-                        border-spacing: 3px 2px;
-                    }
-                    
-                    .habit-table th {
-                        font-size: 9px;
-                    }
-                    
-                    .week-label {
-                        font-size: 9px;
-                    }
-                    
-                    .cell-wrapper {
-                        min-width: 32px;
-                        min-height: 32px;
-                    }
-                    
-                    .check-ui {
-                        font-size: 18px;
-                    }
-                    
-                    .missed-indicator {
-                        width: 14px;
-                        height: 14px;
-                    }
-                    
-                    .missed-indicator::before {
-                        font-size: 8px;
-                    }
-                    
-                    .motivation-text {
-                        font-size: 11px;
-                    }
-                    
-                    .stat-item {
-                        font-size: 11px;
-                    }
-                    
-                    .badge-text {
-                        font-size: 10px;
-                    }
-                    
-                    .empty-state {
-                        padding: 40px 16px;
-                    }
-                    
-                    .empty-state h3 {
-                        font-size: 18px;
-                    }
-                    
-                    .empty-state p {
-                        font-size: 13px;
-                    }
-                }
-
-                /* Very Small (360px and below) */
-                @media (max-width: 360px) {
-                    .habit-table {
-                        min-width: 320px;
-                        border-spacing: 2px;
-                    }
-                    
-                    .cell-wrapper {
-                        min-width: 28px;
-                        min-height: 28px;
-                    }
-                    
-                    .check-ui {
-                        font-size: 16px;
-                    }
-                    
-                    .missed-indicator {
-                        width: 12px;
-                        height: 12px;
-                    }
-                    
-                    .missed-indicator::before {
-                        font-size: 7px;
-                    }
-                    
-                    .habit-table th {
-                        font-size: 8px;
-                    }
-                    
-                    .week-label {
-                        font-size: 8px;
-                    }
-                }
-            `}</style>
-
-            <main className="habit-content">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-4 md:p-6 font-['Inter',sans-serif]">
+            <main className="max-w-[1400px] mx-auto">
+                {/* ========== HEADER SECTION ========== */}
                 <motion.header
-                    className="habit-header"
+                    className="flex justify-between items-center mb-8 flex-wrap gap-4"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                 >
                     <div>
-                        <h1>🧠 Your Habits</h1>
-                        <p>Turn consistency into your greatest strength.</p>
+                        <h1 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-gray-800 to-indigo-600 bg-clip-text text-transparent">
+                            🧠 Your Habits
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Turn consistency into your greatest strength.
+                        </p>
                     </div>
 
+                    {/* Input Section */}
                     <motion.div
-                        className="habit-input-wrapper"
+                        className="flex gap-2 bg-white py-1 pl-4 pr-1 rounded-full shadow-sm border-2 border-transparent transition-all duration-300 hover:shadow-md focus-within:border-indigo-600 focus-within:shadow-indigo-100"
                         whileHover={{ scale: 1.02 }}
                     >
                         <input
@@ -790,10 +284,11 @@ const CreateHabitTracker = () => {
                             value={input}
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={e => e.key === "Enter" && handleAddTask()}
+                            className="border-none outline-none w-[180px] md:w-[220px] text-sm bg-transparent text-gray-800 placeholder:text-gray-400"
                         />
                         <motion.button
                             onClick={handleAddTask}
-                            className="add-btn"
+                            className="w-9 h-9 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-md"
                             whileTap={{ scale: 0.95 }}
                         >
                             {btnLoader ? <LoaderIcon /> : <Add />}
@@ -801,7 +296,8 @@ const CreateHabitTracker = () => {
                     </motion.div>
                 </motion.header>
 
-                <div className="habit-grid">
+                {/* ========== HABITS GRID ========== */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                     <AnimatePresence mode="popLayout">
                         {tasks.map(task => {
                             const progress = calculateTaskProgress(task);
@@ -811,7 +307,7 @@ const CreateHabitTracker = () => {
 
                             return (
                                 <motion.div
-                                    className="habit-card"
+                                    className="bg-white rounded-2xl p-4 md:p-5 shadow-sm border border-gray-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200"
                                     key={task._id}
                                     layout
                                     initial={{ opacity: 0, scale: 0.95 }}
@@ -820,11 +316,14 @@ const CreateHabitTracker = () => {
                                     whileHover={{ y: -3 }}
                                     transition={{ type: "spring", stiffness: 300 }}
                                 >
-                                    <div className="card-header">
-                                        <div className="title-group">
-                                            <h3>{task.title}</h3>
+                                    {/* ========== CARD HEADER ========== */}
+                                    <div className="flex justify-between items-start flex-wrap gap-2 mb-4">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h3 className="text-base font-bold text-gray-800 break-words">
+                                                {task.title}
+                                            </h3>
                                             <motion.span
-                                                className="progress-pill"
+                                                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap"
                                                 animate={{ scale: [1, 1.1, 1] }}
                                                 transition={{ duration: 0.5 }}
                                             >
@@ -832,7 +331,7 @@ const CreateHabitTracker = () => {
                                             </motion.span>
                                         </div>
                                         <motion.button
-                                            className="delete-icon-btn"
+                                            className="bg-transparent border-none text-gray-400 cursor-pointer p-1.5 rounded-lg transition-all duration-200 hover:text-red-500 hover:bg-red-50"
                                             onClick={() => handleDelete(task._id)}
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
@@ -841,15 +340,21 @@ const CreateHabitTracker = () => {
                                         </motion.button>
                                     </div>
 
-                                    <div className="grid-scroll-area">
-                                        <table className="habit-table">
+                                    {/* ========== SCROLLABLE TABLE AREA ========== */}
+                                    <div className="overflow-x-auto overflow-y-visible -mx-2 px-2 scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-indigo-200 hover:scrollbar-thumb-indigo-600">
+                                        <table className="w-full min-w-[450px] md:min-w-[500px] border-separate border-spacing-1 md:border-spacing-1.5">
                                             <thead>
                                                 <tr>
-                                                    <th></th>
-                                                    {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <th key={i}>{d}</th>)}
+                                                    <th className="text-[11px] font-semibold text-gray-500 text-center pb-1.5"></th>
+                                                    {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                                                        <th key={i} className="text-[11px] font-semibold text-gray-500 text-center pb-1.5">
+                                                            {d}
+                                                        </th>
+                                                    ))}
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                {/* Map through weeks */}
                                                 {task.weeks.map((week, wIndex) => (
                                                     <motion.tr
                                                         key={wIndex}
@@ -857,17 +362,25 @@ const CreateHabitTracker = () => {
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: wIndex * 0.05 }}
                                                     >
-                                                        <td className="week-label">W{week.weekNo}</td>
+                                                        {/* Week Label */}
+                                                        <td className="text-[11px] font-bold text-indigo-600 text-center whitespace-nowrap">
+                                                            W{week.weekNo}
+                                                        </td>
+
+                                                        {/* Map through days in week */}
                                                         {week.days.map((day, dIndex) => {
                                                             const missed = isMissed(day.date, day.checked);
                                                             const todayDay = isToday(day.date);
                                                             const future = isFuture(day.date);
 
                                                             return (
-                                                                <td key={dIndex} className={todayDay ? "current-day" : ""}>
-                                                                    <div className={`cell-wrapper ${future ? "is-future" : ""}`}>
+                                                                <td
+                                                                    key={dIndex}
+                                                                    className={todayDay ? "bg-indigo-50 rounded-xl" : ""}
+                                                                >
+                                                                    <div className={`relative flex justify-center items-center min-w-[32px] md:min-w-[40px] min-h-[32px] md:min-h-[40px] ${future ? "opacity-30 pointer-events-none" : ""}`}>
                                                                         <motion.label
-                                                                            className="checkbox-custom"
+                                                                            className="cursor-pointer relative flex items-center justify-center"
                                                                             whileTap={{ scale: 0.95 }}
                                                                         >
                                                                             <input
@@ -875,23 +388,29 @@ const CreateHabitTracker = () => {
                                                                                 checked={day.checked}
                                                                                 disabled={future}
                                                                                 onChange={e => handleCheckbox(task._id, week.weekNo, dIndex, e.target.checked)}
+                                                                                className="hidden"
                                                                             />
-                                                                            <span className="check-ui">
+                                                                            <span className="text-xl md:text-2xl transition-all duration-200 flex items-center justify-center">
                                                                                 {day.checked ? (
                                                                                     <motion.div
                                                                                         initial={{ scale: 0, rotate: -180 }}
                                                                                         animate={{ scale: 1, rotate: 0 }}
                                                                                         transition={{ type: "spring", stiffness: 400 }}
                                                                                     >
-                                                                                        <CheckCircle className="icon-done" size={24} />
+                                                                                        <CheckCircle
+                                                                                            className="text-emerald-500 drop-shadow-md"
+                                                                                            size={24}
+                                                                                        />
                                                                                     </motion.div>
                                                                                 ) : (
-                                                                                    <RadioButtonUnchecked className="icon-empty" />
+                                                                                    <RadioButtonUnchecked className="text-gray-300" />
                                                                                 )}
                                                                             </span>
                                                                         </motion.label>
+
+                                                                        {/* Missed Indicator - shows red X for missed days */}
                                                                         {missed && !day.checked && !future && (
-                                                                            <div className="missed-indicator" />
+                                                                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 md:w-[18px] md:h-[18px] bg-red-500 rounded-full flex items-center justify-center animate-[fadeInScale_0.3s_ease-out] shadow-[0_0_0_2px_white,0_2px_4px_rgba(0,0,0,0.1)] before:content-['✕'] before:text-white before:text-[8px] md:before:text-[10px] before:font-bold" />
                                                                         )}
                                                                     </div>
                                                                 </td>
@@ -903,24 +422,31 @@ const CreateHabitTracker = () => {
                                         </table>
                                     </div>
 
+                                    {/* ========== CARD FOOTER WITH STATS ========== */}
                                     <motion.div
-                                        className="card-footer"
+                                        className="mt-4 pt-3 border-t border-gray-200"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                     >
-                                        <div className="footer-content">
-                                            <div className="motivation-text">
+                                        <div className="flex items-center justify-between flex-wrap gap-2">
+                                            <div className="flex items-center gap-2 text-xs text-gray-500">
                                                 <AutoAwesome sx={{ fontSize: 14, color: '#4F46E5' }} />
                                                 <span>{getMotivation(progress)}</span>
                                             </div>
-                                            <div className="stats-badges">
-                                                <div className="stat-item">
+                                            <div className="flex items-center gap-3">
+                                                {/* Completed stats */}
+                                                <div className="flex items-center gap-1.5 text-xs">
                                                     <span>✅</span>
-                                                    <span className="stat-count">{totalCompleted}/{totalDays}</span>
+                                                    <span className="font-semibold text-gray-800">
+                                                        {totalCompleted}/{totalDays}
+                                                    </span>
                                                 </div>
-                                                <div className="stat-item">
+                                                {/* Achievement badge */}
+                                                <div className="flex items-center gap-1.5 text-xs">
                                                     <span style={{ fontSize: 14 }}>{badge.icon}</span>
-                                                    <span className="badge-text" style={{ color: badge.color }}>{badge.text}</span>
+                                                    <span className="text-[11px] font-semibold" style={{ color: badge.color }}>
+                                                        {badge.text}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -931,18 +457,54 @@ const CreateHabitTracker = () => {
                     </AnimatePresence>
                 </div>
 
+                {/* ========== EMPTY STATE ========== */}
                 {tasks.length === 0 && (
                     <motion.div
-                        className="empty-state"
+                        className="text-center py-12 px-5 bg-white rounded-2xl mt-8 border border-gray-200"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <Target size={40} style={{ margin: '0 auto 15px', color: '#4F46E5' }} />
-                        <h3>No habits yet</h3>
-                        <p>Create your first habit above and start building consistency! 🚀</p>
+                        <Target size={40} className="mx-auto mb-4 text-indigo-600" />
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">No habits yet</h3>
+                        <p className="text-sm text-gray-500">
+                            Create your first habit above and start building consistency! 🚀
+                        </p>
                     </motion.div>
                 )}
             </main>
+
+            {/* Custom animation keyframes */}
+            <style>{`
+                @keyframes fadeInScale {
+                    from {
+                        opacity: 0;
+                        transform: translate(-50%, -50%) scale(0);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                }
+                
+                /* Custom scrollbar for better UX (optional, works with Tailwind) */
+                .scrollbar-thin::-webkit-scrollbar {
+                    height: 4px;
+                }
+                
+                .scrollbar-thin::-webkit-scrollbar-track {
+                    background: #F3F4F6;
+                    border-radius: 10px;
+                }
+                
+                .scrollbar-thin::-webkit-scrollbar-thumb {
+                    background: #C7D2FE;
+                    border-radius: 10px;
+                }
+                
+                .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                    background: #4F46E5;
+                }
+            `}</style>
         </div>
     );
 }
