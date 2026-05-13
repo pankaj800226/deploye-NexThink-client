@@ -112,7 +112,7 @@ const DailyPlanner: React.FC = () => {
         logging: false,
         windowWidth: element.scrollWidth,
         windowHeight: element.scrollHeight,
-        onclone: (clonedDoc, element) => {
+        onclone: (clonedDoc) => {
           // Ensure all styles are applied in the cloned document
           const clonedElement = clonedDoc.body.querySelector('.planner-pdf-container');
           if (clonedElement) {
